@@ -44,10 +44,10 @@ with trilogarithms in $P_\pm$ (eqs. (4.25) and (4.26) of the thesis). Its deriva
 ```math
 \begin{aligned}
 \partial_{k^2}\Delta L_3=\frac{\pi^3}{k}\Big[
-&\frac{\operatorname{Li}_2\big(-\frac{k_{34}-k}{k_{12}+k}\big)-\operatorname{Li}_2\big(-\frac{k_{34}-k}{2k}\big)+\frac12\log^2\frac{k_{12}+k}{2k}}{(k_{12}-k)(k_{34}+k)}\\
-&+\frac{\operatorname{Li}_2\big(-\frac{k_{12}-k}{k_{34}+k}\big)-\operatorname{Li}_2\big(-\frac{k_{12}-k}{2k}\big)+\frac12\log^2\frac{k_{34}+k}{2k}}{(k_{12}+k)(k_{34}-k)}\\
+&\frac{\mathrm{Li}_2\big(-\frac{k_{34}-k}{k_{12}+k}\big)-\mathrm{Li}_2\big(-\frac{k_{34}-k}{2k}\big)+\frac12\log^2\frac{k_{12}+k}{2k}}{(k_{12}-k)(k_{34}+k)}\\
+&+\frac{\mathrm{Li}_2\big(-\frac{k_{12}-k}{k_{34}+k}\big)-\mathrm{Li}_2\big(-\frac{k_{12}-k}{2k}\big)+\frac12\log^2\frac{k_{34}+k}{2k}}{(k_{12}+k)(k_{34}-k)}\\
 &+\frac{\log\frac{k_{12}+k}{2k}\,\log\frac{k_{34}+k}{2k}}{(k_{12}-k)(k_{34}-k)}\\
-&-\frac{\operatorname{Li}_2\big(-\frac{k_{12}-k}{2k}\big)+\operatorname{Li}_2\big(-\frac{k_{34}-k}{2k}\big)+\frac{\pi^2}{6}}{(k_{12}+k)(k_{34}+k)}\Big]
+&-\frac{\mathrm{Li}_2\big(-\frac{k_{12}-k}{2k}\big)+\mathrm{Li}_2\big(-\frac{k_{34}-k}{2k}\big)+\frac{\pi^2}{6}}{(k_{12}+k)(k_{34}+k)}\Big]
 \end{aligned}
 ```
 The step from the derivative to $\Delta L_3$ uses two properties of the integral: its
