@@ -34,21 +34,22 @@ are those of the submitted thesis.
 
 With $r_{12}=\frac{k_{12}-k}{k_{12}+k}$ and $r_{34}=\frac{k_{34}-k}{k_{34}+k}$, the difference is
 
-$$\Delta L_3=2\pi^3\Big[\frac{P_+}{k_{12}+k_{34}}+\frac{P_-}{k_{12}-k_{34}}\Big]\qquad(4.24)$$
+```math
+\Delta L_3=2\pi^3\Big[\frac{P_+}{k_{12}+k_{34}}+\frac{P_-}{k_{12}-k_{34}}\Big]\qquad(4.24)
+```
 
 with trilogarithms in $P_\pm$ (eqs. (4.25) and (4.26) of the thesis). Its derivative is
 (eq. (4.21))
 
-$$
+```math
 \begin{aligned}
 \partial_{k^2}\Delta L_3=\frac{\pi^3}{k}\Big[
-&\frac{\operatorname{Li}_2\!\big(-\tfrac{k_{34}-k}{k_{12}+k}\big)-\operatorname{Li}_2\!\big(-\tfrac{k_{34}-k}{2k}\big)+\tfrac12\log^2\tfrac{k_{12}+k}{2k}}{(k_{12}-k)(k_{34}+k)}\\
-+&\frac{\operatorname{Li}_2\!\big(-\tfrac{k_{12}-k}{k_{34}+k}\big)-\operatorname{Li}_2\!\big(-\tfrac{k_{12}-k}{2k}\big)+\tfrac12\log^2\tfrac{k_{34}+k}{2k}}{(k_{12}+k)(k_{34}-k)}\\
-+&\frac{\log\frac{k_{12}+k}{2k}\,\log\frac{k_{34}+k}{2k}}{(k_{12}-k)(k_{34}-k)}
--\frac{\operatorname{Li}_2\!\big(-\tfrac{k_{12}-k}{2k}\big)+\operatorname{Li}_2\!\big(-\tfrac{k_{34}-k}{2k}\big)+\tfrac{\pi^2}{6}}{(k_{12}+k)(k_{34}+k)}\Big].
+&\frac{\operatorname{Li}_2\big(-\frac{k_{34}-k}{k_{12}+k}\big)-\operatorname{Li}_2\big(-\frac{k_{34}-k}{2k}\big)+\frac12\log^2\frac{k_{12}+k}{2k}}{(k_{12}-k)(k_{34}+k)}\\
+&+\frac{\operatorname{Li}_2\big(-\frac{k_{12}-k}{k_{34}+k}\big)-\operatorname{Li}_2\big(-\frac{k_{12}-k}{2k}\big)+\frac12\log^2\frac{k_{34}+k}{2k}}{(k_{12}+k)(k_{34}-k)}\\
+&+\frac{\log\frac{k_{12}+k}{2k}\,\log\frac{k_{34}+k}{2k}}{(k_{12}-k)(k_{34}-k)}\\
+&-\frac{\operatorname{Li}_2\big(-\frac{k_{12}-k}{2k}\big)+\operatorname{Li}_2\big(-\frac{k_{34}-k}{2k}\big)+\frac{\pi^2}{6}}{(k_{12}+k)(k_{34}+k)}\Big]
 \end{aligned}
-$$
-
+```
 The step from the derivative to $\Delta L_3$ uses two properties of the integral: its
 $k^2$-derivative is (4.21), and it vanishes as $k\to\infty$ at fixed $k_{12},k_{34}$.
 $\Delta L_3$ is the integral (3.17) of the thesis, with the term $[PZP]$ taken in the
@@ -58,9 +59,9 @@ integration order of eq. (4.23).
 
 | File | Thesis section | What it checks |
 |------|----------------|----------------|
-| `notebooks/chapter-04-derivative-companion.nb` | 4.1 | $[(Z_1-Z_4)^2\dot P]$ in closed form (4.9) against its $s$ integral (4.6); the kernel $\mathcal Q$: primitive (4.17), closed form (4.18), derivative (4.16), and (4.18) against quadrature of (4.15); the exact assembly of the derivative from six values of $\mathcal Q$ and (4.9) through (4.14), with the ten dilogarithm arguments, the Landen pairs (4.19)-(4.20) and the four remaining dilogarithms, reproducing (4.21); (4.21) against the one-dimensional integrals (4.6), (4.11), (4.13) |
-| `notebooks/chapter-04-full-difference-companion.nb` | 4.2 | the closed form (4.24)-(4.26) typed as printed; Landen (4.19) for $r_{12},r_{34}$ and the five-term relation (4.28); the exact $k$-derivative of (4.24), which equals $2k$ times (4.21); the limits of the trilogarithm arguments ($-1$, $\tfrac12$, $1$, $1$) and $P_\pm\to0$; (4.24) against the integral (4.22); the loop factor of (4.23) against oscillatory quadrature; direct integration of (3.17) with $[PZP]$ as in (4.23) against (4.24) |
-| `scripts/chapter-04-numerical-checks.py` | 4.1, 4.2 | independent numerical checks (132) with mpmath at 30 digits: building blocks, (4.21) against the integrals (4.6), (4.11), (4.13); (4.24)-(4.26) against direct integration of (3.17) with $[PZP]$ as in (4.23), at fixed and random points of $-1<r_{12},r_{34}<1$; the $k^2$-derivative of the direct integral against (4.21) and its fall-off like $1/k$; consistency of the closed form |
+| `chapter-04-derivative-companion.nb` | 4.1 | $[(Z_1-Z_4)^2\dot P]$ in closed form (4.9) against its $s$ integral (4.6); the kernel $\mathcal Q$: primitive (4.17), closed form (4.18), derivative (4.16), and (4.18) against quadrature of (4.15); the exact assembly of the derivative from six values of $\mathcal Q$ and (4.9) through (4.14), with the ten dilogarithm arguments, the Landen pairs (4.19)-(4.20) and the four remaining dilogarithms, reproducing (4.21); (4.21) against the one-dimensional integrals (4.6), (4.11), (4.13) |
+| `chapter-04-full-difference-companion.nb` | 4.2 | the closed form (4.24)-(4.26) typed as printed; Landen (4.19) for $r_{12},r_{34}$ and the five-term relation (4.28); the exact $k$-derivative of (4.24), which equals $2k$ times (4.21); the limits of the trilogarithm arguments ($-1$, $\frac12$, $1$, $1$) and $P_\pm\to0$; (4.24) against the integral (4.22); the loop factor of (4.23) against oscillatory quadrature; direct integration of (3.17) with $[PZP]$ as in (4.23) against (4.24) |
+| `chapter-04-numerical-checks.py` | 4.1, 4.2 | independent numerical checks (132) with mpmath at 30 digits: building blocks, (4.21) against the integrals (4.6), (4.11), (4.13); (4.24)-(4.26) against direct integration of (3.17) with $[PZP]$ as in (4.23), at fixed and random points of $-1<r_{12},r_{34}<1$; the $k^2$-derivative of the direct integral against (4.21) and its fall-off like $1/k$; consistency of the closed form |
 | `requirements.txt` | | `mpmath>=1.3` |
 
 The script is transcribed from the printed equations of the thesis. It does not use the
@@ -80,7 +81,7 @@ check aborts the evaluation.
 
 ```sh
 pip install -r requirements.txt
-python scripts/chapter-04-numerical-checks.py
+python chapter-04-numerical-checks.py
 ```
 
 It takes about 2 minutes and ends with `132 checks, ALL PASSED`.
