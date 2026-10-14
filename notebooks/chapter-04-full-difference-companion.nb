@@ -1,1226 +1,231 @@
 Notebook[
- {Cell["Chapter 4 companion: the undifferentiated three-loop difference", 
+ {Cell["Chapter 4 companion: the undifferentiated difference (section 4.2)", 
    "Title"], Cell["Thesis: Comparing UV Regularizations for Cosmological \
 Correlators in de Sitter Space, Sanam Limbu (LMU Munich, 2026), Chapter 4. \
 Notation: a = k12, b = k34, and k is the exchanged momentum. 14.3.0 for \
 Microsoft Windows (64-bit) (July 8, 2025).", "Text"], 
-  Cell["This notebook follows section 4.2. It records the computer-algebra \
-steps behind the boxed difference (4.24). It does not depend on the \
-derivative notebook. Exact checks return a zero residual under a > 0, b > 0, \
-k > 0. Numerical checks state how many digits agreed. A precision goal is not \
-an error bound. The ansatz search that found (4.24) is not used, and the \
-bounds behind the large-k limit are not added.", "Text"], 
-  Cell["1. Setup", "Section"], Cell["a = k12, b = k34, and k is the exchanged \
-momentum, all positive. Each check stores its name, whether it is exact or \
-numerical, and its residual. A failed check aborts the evaluation.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"ClearAll", "[", "\"Global`*\"", "]"}], ";", 
-      RowBox[{"$MaxExtraPrecision", "=", "10000"}], ";", 
-      RowBox[{"checks", "=", RowBox[{"{", "}"}]}], ";", 
-      RowBox[{"assumptions", "=", RowBox[{RowBox[{"a", ">", "0"}], "&&", 
-          RowBox[{"b", ">", "0"}], "&&", RowBox[{"k", ">", "0"}]}]}], ";", 
-      RowBox[{RowBox[{"failCheck", "[", RowBox[{"name_", ",", "detail_"}], 
-          "]"}], ":=", RowBox[{"(", RowBox[{RowBox[{"Print", "[", 
-              RowBox[{"\"FAILED: \"", ",", "name"}], "]"}], ";", 
-            RowBox[{"Print", "[", "detail", "]"}], ";", 
-            RowBox[{"Abort", "[", "]"}]}], ")"}]}], ";", 
-      RowBox[{RowBox[{"checkExact", "[", RowBox[{"name_", ",", "residual_"}], 
-          "]"}], ":=", RowBox[{"Module", "[", 
-          RowBox[{RowBox[{"{", RowBox[{"r", "=", "residual"}], "}"}], ",", 
-            RowBox[{RowBox[{"If", "[", RowBox[{RowBox[{"r", "=!=", "0"}], 
-                  ",", RowBox[{"r", "=", RowBox[{"Together", "[", "residual", 
-                      "]"}]}]}], "]"}], ";", RowBox[{"If", "[", 
-                RowBox[{RowBox[{"r", "=!=", "0"}], ",", RowBox[{"r", "=", 
-                    RowBox[{"Expand", "[", "residual", "]"}]}]}], "]"}], ";", 
-              RowBox[{"If", "[", RowBox[{RowBox[{"r", "=!=", "0"}], ",", 
-                  RowBox[{"r", "=", RowBox[{"Simplify", "[", RowBox[
-                       {"residual", ",", RowBox[{"Assumptions", "\[Rule]", 
-                          "assumptions"}]}], "]"}]}]}], "]"}], ";", 
-              RowBox[{"If", "[", RowBox[{RowBox[{"r", "=!=", "0"}], ",", 
-                  RowBox[{"r", "=", RowBox[{"FullSimplify", "[", RowBox[
-                       {"residual", ",", RowBox[{"Assumptions", "\[Rule]", 
-                          "assumptions"}]}], "]"}]}]}], "]"}], ";", 
-              RowBox[{"If", "[", RowBox[{RowBox[{"r", "=!=", "0"}], ",", 
-                  RowBox[{"failCheck", "[", RowBox[{"name", ",", 
-                      "residual"}], "]"}]}], "]"}], ";", RowBox[{"AppendTo", 
-                "[", RowBox[{"checks", ",", RowBox[{"Association", "[", 
-                    RowBox[{RowBox[{"\"name\"", "\[Rule]", "name"}], ",", 
-                      RowBox[{"\"kind\"", "\[Rule]", "\"exact\""}], ",", 
-                      RowBox[{"\"residual\"", "\[Rule]", "0"}], ",", 
-                      RowBox[{"\"agreement\"", "\[Rule]", "\"identity\""}]}], 
-                    "]"}]}], "]"}], ";", "0"}]}], "]"}]}], ";", 
-      RowBox[{RowBox[{"checkTrue", "[", RowBox[{"name_", ",", "value_"}], 
-          "]"}], ":=", RowBox[{"If", "[", RowBox[
-           {RowBox[{"TrueQ", "[", "value", "]"}], ",", 
-            RowBox[{"checkExact", "[", RowBox[{"name", ",", "0"}], "]"}], 
-            ",", RowBox[{"failCheck", "[", RowBox[{"name", ",", "value"}], 
-              "]"}]}], "]"}]}], ";", 
-      RowBox[{RowBox[{"checkNumerical", "[", RowBox[{"name_", ",", "got_", 
-            ",", "want_", ",", "digits_Integer"}], "]"}], ":=", 
-        RowBox[{"Module", "[", RowBox[{RowBox[{"{", RowBox[{"diff", ",", 
-                "scale", ",", "rel", ",", "agreement"}], "}"}], ",", 
-            RowBox[{RowBox[{"diff", "=", RowBox[{"Quiet", "[", RowBox[
-                   {RowBox[{RowBox[{"N", "[", RowBox[{"got", ",", RowBox[
-                          {"digits", "+", "10"}]}], "]"}], "-", RowBox[
-                       {"N", "[", RowBox[{"want", ",", RowBox[{"digits", "+", 
-                          "10"}]}], "]"}]}], ",", RowBox[{"{", RowBox[
-                       {StyleBox[RowBox[{"N", "::", "meprec"}], 
-                         "MessageName"], ",", StyleBox[RowBox[{"N", "::", 
-                          "precw"}], "MessageName"]}], "}"}]}], "]"}]}], ";", 
-              RowBox[{"If", "[", RowBox[{RowBox[{"!", RowBox[{"NumericQ", 
-                      "[", "diff", "]"}]}], ",", RowBox[{"failCheck", "[", 
-                    RowBox[{"name", ",", "diff"}], "]"}]}], "]"}], ";", 
-              RowBox[{"scale", "=", RowBox[{"Max", "[", RowBox[{"1", ",", 
-                    RowBox[{"Abs", "[", RowBox[{"Quiet", "[", RowBox[
-                         {RowBox[{"N", "[", RowBox[{"want", ",", RowBox[
-                          {"digits", "+", "10"}]}], "]"}], ",", RowBox[
-                          {"{", RowBox[{StyleBox[RowBox[{"N", "::", 
-                          "meprec"}], "MessageName"], ",", StyleBox[RowBox[
-                          {"N", "::", "precw"}], "MessageName"]}], "}"}]}], 
-                        "]"}], "]"}]}], "]"}]}], ";", RowBox[{"rel", "=", 
-                FractionBox[RowBox[{"Abs", "[", "diff", "]"}], "scale"]}], 
-              ";", RowBox[{"agreement", "=", RowBox[{"If", "[", RowBox[
-                   {RowBox[{"rel", "\[Equal]", "0"}], ",", RowBox[{"digits", 
-                      "+", "10"}], ",", RowBox[{"Floor", "[", RowBox[
-                       {"-", RowBox[{"Log10", "[", "rel", "]"}]}], "]"}]}], 
-                  "]"}]}], ";", RowBox[{"If", "[", RowBox[
-                 {RowBox[{RowBox[{"!", RowBox[{"IntegerQ", "[", "agreement", 
-                        "]"}]}], "||", RowBox[{"agreement", "<", 
-                      "digits"}]}], ",", RowBox[{"failCheck", "[", 
-                    RowBox[{"name", ",", RowBox[{"{", RowBox[{RowBox[{"N", 
-                          "[", RowBox[{"diff", ",", "8"}], "]"}], ",", 
-                          "agreement"}], "}"}]}], "]"}]}], "]"}], ";", 
-              RowBox[{"AppendTo", "[", RowBox[{"checks", ",", RowBox[
-                   {"Association", "[", RowBox[{RowBox[{"\"name\"", 
-                        "\[Rule]", "name"}], ",", RowBox[{"\"kind\"", 
-                        "\[Rule]", "\"numerical\""}], ",", RowBox[
-                       {"\"residual\"", "\[Rule]", RowBox[{"N", "[", RowBox[
-                          {"diff", ",", "6"}], "]"}]}], ",", RowBox[
-                       {"\"agreement\"", "\[Rule]", RowBox[{RowBox[
-                          {"ToString", "[", "agreement", "]"}], "<>", 
-                          "\" digits\""}]}]}], "]"}]}], "]"}], ";", 
-              "agreement"}]}], "]"}]}], ";", 
-      RowBox[{RowBox[{"bench", "[", "s_String", "]"}], ":=", 
-        RowBox[{"Module", "[", RowBox[
-           {RowBox[{"{", RowBox[{RowBox[{"t", "=", "s"}], ",", 
-                RowBox[{"sign", "=", "1"}], ",", "parts", ",", "frac"}], 
-              "}"}], ",", RowBox[{RowBox[{"If", "[", RowBox[
-                 {RowBox[{"StringStartsQ", "[", RowBox[{"t", ",", "\"-\""}], 
-                    "]"}], ",", RowBox[{RowBox[{"sign", "=", RowBox[
-                       {"-", "1"}]}], ";", RowBox[{"t", "=", RowBox[
-                       {"StringDrop", "[", RowBox[{"t", ",", "1"}], 
-                        "]"}]}]}]}], "]"}], ";", RowBox[{"parts", "=", 
-                RowBox[{"StringSplit", "[", RowBox[{"t", ",", "\".\""}], 
-                  "]"}]}], ";", RowBox[{"frac", "=", RowBox[{"If", "[", 
-                  RowBox[{RowBox[{RowBox[{"Length", "[", "parts", "]"}], 
-                      "\[Equal]", "1"}], ",", "\"\"", ",", RowBox[{"parts", 
-                      "\[LeftDoubleBracket]", "2", 
-                      "\[RightDoubleBracket]"}]}], "]"}]}], ";", 
-              FractionBox[RowBox[{"sign", " ", RowBox[{"ToExpression", "[", 
-                   RowBox[{"StringDelete", "[", RowBox[{"t", ",", "\".\""}], 
-                     "]"}], "]"}]}], SuperscriptBox["10", RowBox[
-                 {"StringLength", "[", "frac", "]"}]]]}]}], "]"}]}], ";", 
-      RowBox[{RowBox[{"sectionRows", "[", "start_Integer", "]"}], ":=", 
-        RowBox[{"Grid", "[", RowBox[{RowBox[{"Prepend", "[", 
-              RowBox[{RowBox[{"Values", "/@", RowBox[{"checks", 
-                    "\[LeftDoubleBracket]", RowBox[{"start", ";;", "All"}], 
-                    "\[RightDoubleBracket]"}]}], ",", RowBox[{"{", 
-                  RowBox[{"\"check\"", ",", "\"kind\"", ",", "\"residual\"", 
-                    ",", "\"agreement\""}], "}"}]}], "]"}], ",", 
-            RowBox[{"Frame", "\[Rule]", "All"}], ",", 
-            RowBox[{"Alignment", "\[Rule]", "Left"}]}], "]"}]}], ";", 
-      "$Version"}]], "Input"], 
-  Cell[BoxData["\"14.3.0 for Microsoft Windows (64-bit) (July 8, 2025)\""], 
-   "Output"], Cell["2. Section 4.2.1, the integration prescription (4.23)", 
-   "Section"], Cell["The energy integral in (4.23) is called the loop factor \
-F[a, k, z]. Its closed form uses Log[Abs[k^2 - a^2]], which is needed for k > \
-a. The cells compare it with oscillatory quadrature by LevinRule for k below \
-a, k above a, and k close to a, at several positive z, and with the two \
-benchmark values.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{RowBox[{"F", "[", RowBox[{RowBox[{"u_", "?", "NumericQ"}], ",", 
-            RowBox[{"t_", "?", "NumericQ"}], ",", RowBox[{"z_", "?", 
-              "NumericQ"}]}], "]"}], ":=", 
-        RowBox[{RowBox[{"\[Pi]", " ", RowBox[{"Exp", "[", 
-              RowBox[{RowBox[{"-", "u"}], " ", "z"}], "]"}], " ", 
-            RowBox[{"Log", "[", RowBox[{"Abs", "[", RowBox[{SuperscriptBox[
-                   "t", "2"], "-", SuperscriptBox["u", "2"]}], "]"}], 
-              "]"}]}], "-", RowBox[{"\[Pi]", " ", RowBox[{"Exp", "[", 
-              RowBox[{RowBox[{"-", "u"}], " ", "z"}], "]"}], " ", 
-            RowBox[{"ExpIntegralEi", "[", RowBox[{RowBox[{"(", RowBox[
-                   {"u", "-", "t"}], ")"}], " ", "z"}], "]"}]}], "+", 
-          RowBox[{"\[Pi]", " ", RowBox[{"Exp", "[", RowBox[{"u", " ", "z"}], 
-              "]"}], " ", RowBox[{"ExpIntegralEi", "[", RowBox[{
-                RowBox[{"-", RowBox[{"(", RowBox[{"u", "+", "t"}], ")"}]}], 
-                " ", "z"}], "]"}]}]}]}], ";", 
-      RowBox[{RowBox[{"fNum", "[", RowBox[{"u_", ",", "t_", ",", "z_"}], 
-          "]"}], ":=", RowBox[{"2", " ", RowBox[{"NIntegrate", "[", 
-            RowBox[{FractionBox[RowBox[{"u", " ", RowBox[{"Log", "[", 
-                   RowBox[{SuperscriptBox["p", "2"], "+", SuperscriptBox["t", 
-                      "2"]}], "]"}], " ", RowBox[{"Cos", "[", RowBox[
-                    {"p", " ", "z"}], "]"}]}], RowBox[{SuperscriptBox["p", 
-                  "2"], "+", SuperscriptBox["u", "2"]}]], ",", 
-              RowBox[{"{", RowBox[{"p", ",", "0", ",", "\[Infinity]"}], 
-                "}"}], ",", RowBox[{"Method", "\[Rule]", "\"LevinRule\""}], 
-              ",", RowBox[{"WorkingPrecision", "\[Rule]", "22"}], ",", 
-              RowBox[{"PrecisionGoal", "\[Rule]", "14"}], ",", 
-              RowBox[{"MaxRecursion", "\[Rule]", "30"}]}], "]"}]}]}], ";", 
-      RowBox[{"fTests", "=", RowBox[{"{", RowBox[
-           {RowBox[{"{", RowBox[{FractionBox["13", "10"], ",", FractionBox[
-                 "7", "10"], ",", FractionBox["1", "4"]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{FractionBox["13", "10"], ",", FractionBox[
-                 "7", "10"], ",", "1"}], "}"}], ",", 
-            RowBox[{"{", RowBox[{FractionBox["13", "10"], ",", FractionBox[
-                 "7", "10"], ",", "3"}], "}"}], ",", 
-            RowBox[{"{", RowBox[{FractionBox["4", "5"], ",", FractionBox["5", 
-                 "2"], ",", FractionBox["1", "4"]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{FractionBox["4", "5"], ",", FractionBox["5", 
-                 "2"], ",", FractionBox["6", "5"]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{FractionBox["4", "5"], ",", FractionBox["5", 
-                 "2"], ",", "3"}], "}"}], ",", RowBox[
-             {"{", RowBox[{"1", ",", FractionBox["1000001", "1000000"], ",", 
-                FractionBox["1", "4"]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{"1", ",", FractionBox["1000001", "1000000"], 
-                ",", "1"}], "}"}], ",", RowBox[{"{", RowBox[{"1", ",", 
-                FractionBox["1000001", "1000000"], ",", "3"}], "}"}]}], 
-          "}"}]}], ";", RowBox[{"Do", "[", 
-        RowBox[{RowBox[{"checkNumerical", "[", RowBox[
-             {RowBox[{"\"F against LevinRule at \"", "<>", RowBox[
-                 {"ToString", "[", RowBox[{"N", "[", RowBox[{"test", ",", 
-                      "4"}], "]"}], "]"}]}], ",", RowBox[{"F", "@@", 
-                "test"}], ",", RowBox[{"fNum", "@@", "test"}], ",", "12"}], 
-            "]"}], ",", RowBox[{"{", RowBox[{"test", ",", "fTests"}], 
-            "}"}]}], "]"}], ";", RowBox[{"checkNumerical", "[", 
-        RowBox[{"\"F benchmark (1.3, 0.7, 1)\"", ",", 
-          RowBox[{"F", "[", RowBox[{FractionBox["13", "10"], ",", 
-              FractionBox["7", "10"], ",", "1"}], "]"}], ",", 
-          RowBox[{"bench", "[", "\"-1.06675665228338521805\"", "]"}], ",", 
-          "16"}], "]"}], ";", RowBox[{"checkNumerical", "[", 
-        RowBox[{"\"F benchmark (0.8, 2.5, 1.2)\"", ",", 
-          RowBox[{"F", "[", RowBox[{FractionBox["4", "5"], ",", 
-              FractionBox["5", "2"], ",", FractionBox["6", "5"]}], "]"}], 
-          ",", RowBox[{"bench", "[", "\"2.097562421166968576594\"", "]"}], 
-          ",", "16"}], "]"}], ";", RowBox[{"sectionRows", "[", "start", 
-        "]"}]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, 
-       {"\"F against LevinRule at {1.300, 0.7000, 0.2500}\"", 
-        "\"numerical\"", "7.741956663008475987`3.7938460695235103*^-19", 
-        "\"18 digits\""}, 
-       {"\"F against LevinRule at {1.300, 0.7000, 1.000}\"", "\"numerical\"", 
-        RowBox[{"-", "3.43137044816134840796`4.206372251231783*^-18"}], 
-        "\"17 digits\""}, 
-       {"\"F against LevinRule at {1.300, 0.7000, 3.000}\"", "\"numerical\"", 
-        "2.08612455248485586`2.520622777673855*^-20", "\"19 digits\""}, 
-       {"\"F against LevinRule at {0.8000, 2.500, 0.2500}\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "1.116504156349051701961`4.047885905214284*^-17"}], 
-        "\"17 digits\""}, 
-       {"\"F against LevinRule at {0.8000, 2.500, 1.200}\"", "\"numerical\"", 
-        RowBox[{"-", "6.72278412033719935763`4.204804276081506*^-18"}], 
-        "\"17 digits\""}, 
-       {"\"F against LevinRule at {0.8000, 2.500, 3.000}\"", "\"numerical\"", 
-        "5.21858611368754273753`4.724888480582574*^-18", "\"17 digits\""}, 
-       {"\"F against LevinRule at {1.000, 1.000, 0.2500}\"", "\"numerical\"", 
-        "5.9554007923749326463`3.3223888525900915*^-19", "\"18 digits\""}, 
-       {"\"F against LevinRule at {1.000, 1.000, 1.000}\"", "\"numerical\"", 
-        RowBox[{"-", "5.495693908626214322`3.9862712608009003*^-19"}], 
-        "\"18 digits\""}, 
-       {"\"F against LevinRule at {1.000, 1.000, 3.000}\"", "\"numerical\"", 
-        "1.604711200665591468`2.657812768022215*^-20", "\"19 digits\""}, 
-       {"\"F benchmark (1.3, 0.7, 1)\"", "\"numerical\"", 
-        RowBox[{"-", "1.0368074680878201`3.686602761286058*^-22"}], 
-        "\"22 digits\""}, {"\"F benchmark (0.8, 2.5, 1.2)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "9.17115736462286`2.33967925592749*^-24"}], "\"23 digits\""}}, 
-      GridBoxAlignment -> {"Columns" -> {{Left}}}, AutoDelete -> False, 
-      GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-      GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Grid"]], "Output"], 
-  Cell["3. Section 4.2.2, the limit at large k", "Section"], 
-  Cell["Under a common shift of every momentum logarithm, each three-loop \
-string changes by strings in which one or more loops carry no logarithm. In \
-the prescriptions above such a loop collapses, and the changes cancel. The \
-cell checks that cancellation. Numerically, k times (4.24) tends to a \
-constant for k from 10 to 10^12. The closed form used for that column is \
-(4.24)-(4.26), checked in the following sections.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{"shiftChange", "=", RowBox[
-         {RowBox[{"c", " ", RowBox[{"(", RowBox[{RowBox[{"-", "zzNoP"}], "+", 
-                RowBox[{"2", " ", "zSumP"}], "-", "oneZP", "-", "pZOne"}], 
-              ")"}]}], "+", RowBox[{SuperscriptBox["c", "2"], " ", 
-            RowBox[{"(", RowBox[{"zSum", "-", "oneZOne"}], ")"}]}]}]}], ";", 
-      RowBox[{"collapseRules", "=", RowBox[
-         {"{", RowBox[{RowBox[{"zzNoP", "\[Rule]", "0"}], ",", 
-            RowBox[{"zSumP", "\[Rule]", RowBox[{"z1P", "+", "z4P"}]}], ",", 
-            RowBox[{"oneZP", "\[Rule]", RowBox[{"2", " ", "z1P"}]}], ",", 
-            RowBox[{"pZOne", "\[Rule]", RowBox[{"2", " ", "z4P"}]}], ",", 
-            RowBox[{"oneZOne", "\[Rule]", "zSum"}]}], "}"}]}], ";", 
-      RowBox[{"checkExact", "[", RowBox[
-         {"\"common momentum-log shift cancels\"", ",", 
-          RowBox[{"Expand", "[", RowBox[{"shiftChange", "/.", 
-              "\[VeryThinSpace]", "collapseRules"}], "]"}]}], "]"}], ";", 
-      RowBox[{"ra", "=", FractionBox[RowBox[{"a", "-", "k"}], 
-         RowBox[{"a", "+", "k"}]]}], ";", 
-      RowBox[{"rb", "=", FractionBox[RowBox[{"b", "-", "k"}], 
-         RowBox[{"b", "+", "k"}]]}], ";", 
-      RowBox[{"na", "=", RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], 
-           RowBox[{"2", " ", "k"}]]}]}], ";", 
-      RowBox[{"nb", "=", RowBox[{"-", FractionBox[RowBox[{"b", "-", "k"}], 
-           RowBox[{"2", " ", "k"}]]}]}], ";", 
-      RowBox[{"ca", "=", RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], 
-           RowBox[{"b", "+", "k"}]]}]}], ";", 
-      RowBox[{"cb", "=", RowBox[{"-", FractionBox[RowBox[{"b", "-", "k"}], 
-           RowBox[{"a", "+", "k"}]]}]}], ";", 
-      RowBox[{"rab", "=", RowBox[{"ra", " ", "rb"}]}], ";", 
-      RowBox[{"lA", "=", RowBox[{"Log", "[", FractionBox[
-           RowBox[{"a", "+", "k"}], RowBox[{"2", " ", "k"}]], "]"}]}], ";", 
-      RowBox[{"lB", "=", RowBox[{"Log", "[", FractionBox[
-           RowBox[{"b", "+", "k"}], RowBox[{"2", " ", "k"}]], "]"}]}], ";", 
-      RowBox[{"pPlus", "=", RowBox[{RowBox[{"Zeta", "[", "3", "]"}], "-", 
-          RowBox[{"PolyLog", "[", RowBox[{"3", ",", "ra"}], "]"}], "-", 
-          RowBox[{"PolyLog", "[", RowBox[{"3", ",", "rb"}], "]"}], "-", 
-          RowBox[{"PolyLog", "[", RowBox[{"3", ",", "rab"}], "]"}], "-", 
-          RowBox[{"2", " ", RowBox[{"(", RowBox[{RowBox[{"PolyLog", "[", 
-                  RowBox[{"3", ",", "na"}], "]"}], "+", RowBox[{"PolyLog", 
-                  "[", RowBox[{"3", ",", "nb"}], "]"}]}], ")"}]}], "+", 
-          RowBox[{"PolyLog", "[", RowBox[{"3", ",", "ca"}], "]"}], "+", 
-          RowBox[{"PolyLog", "[", RowBox[{"3", ",", "cb"}], "]"}], "+", 
-          RowBox[{RowBox[{"(", RowBox[{"lA", "+", "lB"}], ")"}], " ", 
-            RowBox[{"(", RowBox[{RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                    "na"}], "]"}], "+", RowBox[{"PolyLog", "[", RowBox[
-                   {"2", ",", "nb"}], "]"}]}], ")"}]}], "+", 
-          RowBox[{FractionBox["1", "6"], " ", SuperscriptBox[
-             RowBox[{"(", RowBox[{"lA", "+", "lB"}], ")"}], "3"]}]}]}], ";", 
-      RowBox[{"pMinus", "=", RowBox[
-         {RowBox[{"2", " ", RowBox[{"(", RowBox[{RowBox[{"PolyLog", "[", 
-                  RowBox[{"3", ",", "ra"}], "]"}], "-", RowBox[{"PolyLog", 
-                  "[", RowBox[{"3", ",", "rb"}], "]"}]}], ")"}]}], "+", 
-          RowBox[{"2", " ", RowBox[{"(", RowBox[{RowBox[{"PolyLog", "[", 
-                  RowBox[{"3", ",", "na"}], "]"}], "-", RowBox[{"PolyLog", 
-                  "[", RowBox[{"3", ",", "nb"}], "]"}]}], ")"}]}], "-", 
-          RowBox[{RowBox[{"(", RowBox[{"lA", "+", "lB"}], ")"}], " ", 
-            RowBox[{"(", RowBox[{RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                    "na"}], "]"}], "-", RowBox[{"PolyLog", "[", RowBox[
-                   {"2", ",", "nb"}], "]"}]}], ")"}]}], "+", 
-          RowBox[{FractionBox["1", "6"], " ", SuperscriptBox["\[Pi]", "2"], 
-            " ", RowBox[{"(", RowBox[{"lA", "-", "lB"}], ")"}]}], "-", 
-          RowBox[{FractionBox["1", "3"], " ", RowBox[
-             {"(", RowBox[{SuperscriptBox["lA", "3"], "-", SuperscriptBox[
-                 "lB", "3"]}], ")"}]}]}]}], ";", 
-      RowBox[{RowBox[{"deltaClosed", "[", RowBox[{"u_", ",", "v_", ",", 
-            "t_"}], "]"}], ":=", RowBox[
-         {RowBox[{"2", " ", SuperscriptBox["\[Pi]", "3"], " ", 
-            RowBox[{"(", RowBox[{FractionBox["pPlus", RowBox[{"a", "+", 
-                   "b"}]], "+", FractionBox["pMinus", RowBox[{"a", "-", 
-                   "b"}]]}], ")"}]}], "/.", "\[VeryThinSpace]", 
-          RowBox[{"{", RowBox[{RowBox[{"a", "\[Rule]", "u"}], ",", 
-              RowBox[{"b", "\[Rule]", "v"}], ",", RowBox[{"k", "\[Rule]", 
-                "t"}]}], "}"}]}]}], ";", RowBox[{"kValues", "=", 
-        RowBox[{"{", RowBox[{"10", ",", "100", ",", SuperscriptBox["10", 
-             "4"], ",", SuperscriptBox["10", "6"], ",", SuperscriptBox["10", 
-             "8"], ",", SuperscriptBox["10", "12"]}], "}"}]}], ";", 
-      RowBox[{"kRows", "=", RowBox[{"Table", "[", 
-          RowBox[{RowBox[{"{", RowBox[{"kk", ",", RowBox[{"Quiet", "[", 
-                  RowBox[{RowBox[{"N", "[", RowBox[{RowBox[{"kk", " ", 
-                          RowBox[{"deltaClosed", "[", RowBox[{FractionBox[
-                          "13", "10"], ",", FractionBox["17", "10"], ",", 
-                          "kk"}], "]"}]}], ",", "12"}], "]"}], ",", 
-                    RowBox[{"{", StyleBox[RowBox[{"N", "::", "meprec"}], 
-                       "MessageName"], "}"}]}], "]"}]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{"kk", ",", "kValues"}], "}"}]}], "]"}]}], 
-      ";", RowBox[{"vLate", "=", RowBox[{"kRows", "\[LeftDoubleBracket]", 
-          RowBox[{RowBox[{"-", "1"}], ",", "2"}], 
-          "\[RightDoubleBracket]"}]}], ";", 
-      RowBox[{"vMid", "=", RowBox[{"kRows", "\[LeftDoubleBracket]", 
-          RowBox[{RowBox[{"-", "2"}], ",", "2"}], 
-          "\[RightDoubleBracket]"}]}], ";", 
-      RowBox[{"checkNumerical", "[", RowBox[
-         {"\"k (4.24) relative change from k=10^8 to k=10^12\"", ",", 
-          FractionBox[RowBox[{"vLate", "-", "vMid"}], "vLate"], ",", "0", 
-          ",", "4"}], "]"}], ";", 
-      TagBox[GridBox[{{RowBox[{"Grid", "[", RowBox[{RowBox[{"Prepend", "[", 
-                RowBox[{"kRows", ",", RowBox[{"{", RowBox[{"\"k\"", ",", 
-                      "\"k*(4.24)\""}], "}"}]}], "]"}], ",", RowBox[{"Frame", 
-                "\[Rule]", "All"}]}], "]"}]}, 
-         {RowBox[{"sectionRows", "[", "start", "]"}]}}, 
-        GridBoxAlignment -> {"Columns" -> {{Left}}}, DefaultBaseStyle -> 
-         "Column", GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-          "Rows" -> {{Automatic}}}], "Column"]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[
-      {{TagBox[GridBox[{{"\"k\"", "\"k*(4.24)\""}, 
-           {"10", "229.86478485986061247517100934206679829715`12."}, 
-           {"100", "293.7048788246507008736`12."}, {"10000", 
-            "305.8102746380420809186`12."}, {"1000000", 
-            "306.0167338877255167244`12."}, {"100000000", 
-            "306.0196467089489338542`12."}, {"1000000000000", 
-            "306.0196847797603498333`12."}}, AutoDelete -> False, 
-          GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-          GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-            "Rows" -> {{Automatic}}}], "Grid"]}, 
-       {TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-            "\"agreement\""}, {"\"common momentum-log shift cancels\"", 
-            "\"exact\"", "0", "\"identity\""}, 
-           {"\"k (4.24) relative change from k=10^8 to k=10^12\"", 
-            "\"numerical\"", 
-            "1.2440641340892288402541469223953`4.793812774050223*^-7", 
-            "\"6 digits\""}}, GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-          AutoDelete -> False, GridBoxFrame -> {"Columns" -> {{True}}, 
-            "Rows" -> {{True}}}, GridBoxItemSize -> 
-           {"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]}}, 
-      GridBoxAlignment -> {"Columns" -> {{Left}}}, DefaultBaseStyle -> 
-       "Column", GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Column"]], "Output"], 
-  Cell["4. Section 4.2.3, the closed form", "Section"], 
-  Cell["Differentiation lowers the transcendental weight by one. The \
-displayed partial-fraction identity is checked exactly. Each trilogarithm \
-argument u, and 1 - u, factors, up to sign, into powers of 2k, a +- k, b +- k \
-and E = a + b. P+ and P- are (4.25) and (4.26), and Delta is (4.24). P+ is \
-symmetric and P- antisymmetric under the simultaneous exchange a <-> b. For \
-positive momenta every logarithm has a positive argument and every \
-polylogarithm argument is below 1.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"weight lowering\"", ",", 
-          RowBox[{"FullSimplify", "[", RowBox[{RowBox[{RowBox[
-                 {SubscriptBox["\[PartialD]", RowBox[{"k"}]], RowBox[
-                   {"PolyLog", "[", RowBox[{"n", ",", RowBox[{"u", "[", "k", 
-                        "]"}]}], "]"}]}], "-", RowBox[{RowBox[{"PolyLog", 
-                    "[", RowBox[{RowBox[{"n", "-", "1"}], ",", RowBox[
-                       {"u", "[", "k", "]"}]}], "]"}], " ", RowBox[
-                   {SubscriptBox["\[PartialD]", RowBox[{"k"}]], RowBox[
-                     {"Log", "[", RowBox[{"u", "[", "k", "]"}], "]"}]}]}]}], 
-              ",", RowBox[{"Assumptions", "\[Rule]", RowBox[
-                 {RowBox[{"n", ">", "1"}], "&&", RowBox[{"n", "\[Element]", 
-                    TemplateBox[{}, "Integers"]}]}]}]}], "]"}]}], "]"}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"partial fractions\"", ",", 
-          RowBox[{"Together", "[", RowBox[{FractionBox["1", RowBox[
-                {RowBox[{"(", RowBox[{"a", "-", "k"}], ")"}], " ", 
-                 RowBox[{"(", RowBox[{"b", "+", "k"}], ")"}]}]], "-", 
-              FractionBox[RowBox[{FractionBox["1", RowBox[{"a", "-", "k"}]], 
-                 "+", FractionBox["1", RowBox[{"b", "+", "k"}]]}], RowBox[
-                {"a", "+", "b"}]]}], "]"}]}], "]"}], ";", 
-      RowBox[{"uList", "=", RowBox[{"{", RowBox[{"ra", ",", "rb", ",", "rab", 
-            ",", "na", ",", "nb", ",", "ca", ",", "cb"}], "}"}]}], ";", 
-      RowBox[{"uNames", "=", RowBox[{"{", RowBox[{"\"(a-k)/(a+k)\"", ",", 
-            "\"(b-k)/(b+k)\"", ",", "\"r12 r34\"", ",", "\"-(a-k)/(2k)\"", 
-            ",", "\"-(b-k)/(2k)\"", ",", "\"-(a-k)/(b+k)\"", ",", 
-            "\"-(b-k)/(a+k)\""}], "}"}]}], ";", 
-      RowBox[{"expectedU", "=", RowBox[
-         {"{", RowBox[{FractionBox[RowBox[{"a", "-", "k"}], 
-             RowBox[{"a", "+", "k"}]], ",", FractionBox[
-             RowBox[{"b", "-", "k"}], RowBox[{"b", "+", "k"}]], ",", 
-            FractionBox[RowBox[{RowBox[{"(", RowBox[{"a", "-", "k"}], ")"}], 
-               " ", RowBox[{"(", RowBox[{"b", "-", "k"}], ")"}]}], 
-             RowBox[{RowBox[{"(", RowBox[{"a", "+", "k"}], ")"}], " ", RowBox[
-                {"(", RowBox[{"b", "+", "k"}], ")"}]}]], ",", 
-            RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], RowBox[
-                {"2", " ", "k"}]]}], ",", RowBox[{"-", FractionBox[RowBox[
-                {"b", "-", "k"}], RowBox[{"2", " ", "k"}]]}], ",", 
-            RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], RowBox[
-                {"b", "+", "k"}]]}], ",", RowBox[{"-", FractionBox[RowBox[
-                {"b", "-", "k"}], RowBox[{"a", "+", "k"}]]}]}], "}"}]}], ";", 
-      RowBox[{"expectedOne", "=", RowBox[
-         {"{", RowBox[{FractionBox[RowBox[{"2", " ", "k"}], 
-             RowBox[{"a", "+", "k"}]], ",", FractionBox[
-             RowBox[{"2", " ", "k"}], RowBox[{"b", "+", "k"}]], ",", 
-            FractionBox[RowBox[{"2", " ", "k", " ", RowBox[{"(", 
-                 RowBox[{"a", "+", "b"}], ")"}]}], RowBox[
-              {RowBox[{"(", RowBox[{"a", "+", "k"}], ")"}], " ", RowBox[
-                {"(", RowBox[{"b", "+", "k"}], ")"}]}]], ",", 
-            FractionBox[RowBox[{"a", "+", "k"}], RowBox[{"2", " ", "k"}]], 
-            ",", FractionBox[RowBox[{"b", "+", "k"}], 
-             RowBox[{"2", " ", "k"}]], ",", FractionBox[
-             RowBox[{"a", "+", "b"}], RowBox[{"b", "+", "k"}]], ",", 
-            FractionBox[RowBox[{"a", "+", "b"}], RowBox[{"a", "+", "k"}]]}], 
-          "}"}]}], ";", RowBox[{"checkExact", "[", 
-        RowBox[{"\"Factor[u] on the trilogarithm arguments\"", ",", 
-          RowBox[{"Total", "[", RowBox[{"Together", "[", RowBox[{
-                RowBox[{"Factor", "[", "uList", "]"}], "-", "expectedU"}], 
-              "]"}], "]"}]}], "]"}], ";", RowBox[{"checkExact", "[", 
-        RowBox[{"\"Factor[1-u] on the trilogarithm arguments\"", ",", 
-          RowBox[{"Total", "[", RowBox[{"Together", "[", RowBox[{
-                RowBox[{"Factor", "[", RowBox[{"1", "-", "uList"}], "]"}], 
-                "-", "expectedOne"}], "]"}], "]"}]}], "]"}], ";", 
-      RowBox[{"factorGrid", "=", RowBox[{"Grid", "[", 
-          RowBox[{RowBox[{"Prepend", "[", RowBox[{RowBox[{"Table", "[", 
-                  RowBox[{RowBox[{"{", RowBox[{RowBox[{"uNames", 
-                          "\[LeftDoubleBracket]", "i", 
-                          "\[RightDoubleBracket]"}], ",", RowBox[{"Factor", 
-                          "[", RowBox[{"uList", "\[LeftDoubleBracket]", "i", 
-                          "\[RightDoubleBracket]"}], "]"}], ",", RowBox[
-                         {"Factor", "[", RowBox[{"1", "-", RowBox[{"uList", 
-                          "\[LeftDoubleBracket]", "i", 
-                          "\[RightDoubleBracket]"}]}], "]"}]}], "}"}], ",", 
-                    RowBox[{"{", RowBox[{"i", ",", RowBox[{"Length", "[", 
-                          "uList", "]"}]}], "}"}]}], "]"}], ",", 
-                RowBox[{"{", RowBox[{"\"u\"", ",", "\"Factor[u]\"", ",", 
-                    "\"Factor[1-u]\""}], "}"}]}], "]"}], ",", 
-            RowBox[{"Frame", "\[Rule]", "All"}]}], "]"}]}], ";", 
-      RowBox[{RowBox[{"canonPoly", "[", "e_", "]"}], ":=", 
-        RowBox[{"e", "/.", "\[VeryThinSpace]", 
-          RowBox[{RowBox[{"PolyLog", "[", RowBox[{"n_", ",", "z_"}], "]"}], 
-            "\[RuleDelayed]", RowBox[{"PolyLog", "[", RowBox[{"n", ",", 
-                RowBox[{"Together", "[", "z", "]"}]}], "]"}]}]}]}], ";", 
-      RowBox[{RowBox[{"swap", "[", "e_", "]"}], ":=", 
-        RowBox[{"e", "/.", "\[VeryThinSpace]", 
-          RowBox[{"{", RowBox[{RowBox[{"a", "\[Rule]", "b"}], ",", 
-              RowBox[{"b", "\[Rule]", "a"}]}], "}"}]}]}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"P+ symmetric under a <-> b\"", 
-          ",", RowBox[{"Together", "[", RowBox[{"canonPoly", "[", 
-              RowBox[{"pPlus", "-", RowBox[{"swap", "[", "pPlus", "]"}]}], 
-              "]"}], "]"}]}], "]"}], ";", RowBox[{"checkExact", "[", 
-        RowBox[{"\"P- antisymmetric under a <-> b\"", ",", 
-          RowBox[{"Together", "[", RowBox[{"canonPoly", "[", 
-              RowBox[{"pMinus", "+", RowBox[{"swap", "[", "pMinus", "]"}]}], 
-              "]"}], "]"}]}], "]"}], ";", RowBox[{"checkTrue", "[", 
-        RowBox[{"\"(4.25) and (4.26): positive logs and polylogarithm \
-arguments below 1\"", ",", RowBox[{"Resolve", "[", 
-            RowBox[{RowBox[{SubscriptBox["\[ForAll]", RowBox[
-                  {RowBox[{"{", RowBox[{"a", ",", "b", ",", "k"}], "}"}], 
-                   ",", RowBox[{RowBox[{"a", ">", "0"}], "&&", RowBox[
-                      {"b", ">", "0"}], "&&", RowBox[{"k", ">", "0"}]}]}]], 
-                RowBox[{"(", RowBox[{RowBox[{FractionBox[RowBox[{RowBox[
-                          {"(", RowBox[{"a", "+", "k"}], ")"}], " ", RowBox[
-                          {"(", RowBox[{"b", "+", "k"}], ")"}]}], RowBox[
-                        {"4", " ", SuperscriptBox["k", "2"]}]], ">", "0"}], 
-                    "&&", RowBox[{FractionBox[RowBox[{"a", "+", "k"}], 
-                       RowBox[{"b", "+", "k"}]], ">", "0"}], "&&", 
-                    RowBox[{FractionBox[RowBox[{"a", "+", "k"}], RowBox[
-                        {"2", " ", "k"}]], ">", "0"}], "&&", RowBox[
-                     {FractionBox[RowBox[{"b", "+", "k"}], RowBox[{"2", " ", 
-                         "k"}]], ">", "0"}], "&&", RowBox[{FractionBox[
-                       RowBox[{"a", "-", "k"}], RowBox[{"a", "+", "k"}]], 
-                      "<", "1"}], "&&", RowBox[{FractionBox[RowBox[{"b", "-", 
-                         "k"}], RowBox[{"b", "+", "k"}]], "<", "1"}], "&&", 
-                    RowBox[{FractionBox[RowBox[{RowBox[{"(", RowBox[{"a", 
-                          "-", "k"}], ")"}], " ", RowBox[{"(", RowBox[{"b", 
-                          "-", "k"}], ")"}]}], RowBox[{RowBox[{"(", RowBox[
-                          {"a", "+", "k"}], ")"}], " ", RowBox[{"(", RowBox[
-                          {"b", "+", "k"}], ")"}]}]], "<", "1"}], "&&", 
-                    RowBox[{RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], 
-                         RowBox[{"2", " ", "k"}]]}], "<", "1"}], "&&", 
-                    RowBox[{RowBox[{"-", FractionBox[RowBox[{"b", "-", "k"}], 
-                         RowBox[{"2", " ", "k"}]]}], "<", "1"}], "&&", 
-                    RowBox[{RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], 
-                         RowBox[{"b", "+", "k"}]]}], "<", "1"}], "&&", 
-                    RowBox[{RowBox[{"-", FractionBox[RowBox[{"b", "-", "k"}], 
-                         RowBox[{"a", "+", "k"}]]}], "<", "1"}]}], ")"}]}], 
-              ",", TemplateBox[{}, "Reals"]}], "]"}]}], "]"}], ";", 
-      RowBox[{"{", RowBox[{"factorGrid", ",", RowBox[{"sectionRows", "[", 
-            "start", "]"}]}], "}"}]}]], "Input"], 
-  Cell[BoxData[RowBox[
-     {"{", RowBox[{TagBox[GridBox[{{"\"u\"", "\"Factor[u]\"", 
-            "\"Factor[1-u]\""}, {"\"(a-k)/(a+k)\"", FractionBox[
-             RowBox[{"a", "-", "k"}], RowBox[{"a", "+", "k"}]], 
-            FractionBox[RowBox[{"2", " ", "k"}], RowBox[{"a", "+", "k"}]]}, 
-           {"\"(b-k)/(b+k)\"", FractionBox[RowBox[{"b", "-", "k"}], 
-             RowBox[{"b", "+", "k"}]], FractionBox[RowBox[{"2", " ", "k"}], 
-             RowBox[{"b", "+", "k"}]]}, {"\"r12 r34\"", 
-            RowBox[{"-", FractionBox[RowBox[{RowBox[{"(", RowBox[{"a", "-", 
-                     "k"}], ")"}], " ", RowBox[{"(", RowBox[{RowBox[
-                      {"-", "b"}], "+", "k"}], ")"}]}], RowBox[
-                {RowBox[{"(", RowBox[{"a", "+", "k"}], ")"}], " ", 
-                 RowBox[{"(", RowBox[{"b", "+", "k"}], ")"}]}]]}], 
-            FractionBox[RowBox[{"2", " ", RowBox[{"(", RowBox[{"a", "+", 
-                   "b"}], ")"}], " ", "k"}], RowBox[{RowBox[{"(", 
-                 RowBox[{"a", "+", "k"}], ")"}], " ", RowBox[
-                {"(", RowBox[{"b", "+", "k"}], ")"}]}]]}, {"\"-(a-k)/(2k)\"", 
-            RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], RowBox[
-                {"2", " ", "k"}]]}], FractionBox[RowBox[{"a", "+", "k"}], 
-             RowBox[{"2", " ", "k"}]]}, {"\"-(b-k)/(2k)\"", 
-            RowBox[{"-", FractionBox[RowBox[{"b", "-", "k"}], RowBox[
-                {"2", " ", "k"}]]}], FractionBox[RowBox[{"b", "+", "k"}], 
-             RowBox[{"2", " ", "k"}]]}, {"\"-(a-k)/(b+k)\"", 
-            RowBox[{"-", FractionBox[RowBox[{"a", "-", "k"}], RowBox[
-                {"b", "+", "k"}]]}], FractionBox[RowBox[{"a", "+", "b"}], 
-             RowBox[{"b", "+", "k"}]]}, {"\"-(b-k)/(a+k)\"", 
-            RowBox[{"-", FractionBox[RowBox[{"b", "-", "k"}], RowBox[
-                {"a", "+", "k"}]]}], FractionBox[RowBox[{"a", "+", "b"}], 
-             RowBox[{"a", "+", "k"}]]}}, AutoDelete -> False, 
-          GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-          GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-            "Rows" -> {{Automatic}}}], "Grid"], ",", 
-        TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-            "\"agreement\""}, {"\"weight lowering\"", "\"exact\"", "0", 
-            "\"identity\""}, {"\"partial fractions\"", "\"exact\"", "0", 
-            "\"identity\""}, {"\"Factor[u] on the trilogarithm arguments\"", 
-            "\"exact\"", "0", "\"identity\""}, 
-           {"\"Factor[1-u] on the trilogarithm arguments\"", "\"exact\"", 
-            "0", "\"identity\""}, {"\"P+ symmetric under a <-> b\"", 
-            "\"exact\"", "0", "\"identity\""}, 
-           {"\"P- antisymmetric under a <-> b\"", "\"exact\"", "0", 
-            "\"identity\""}, {"\"(4.25) and (4.26): positive logs and \
-polylogarithm arguments below 1\"", "\"exact\"", "0", "\"identity\""}}, 
-          GridBoxAlignment -> {"Columns" -> {{Left}}}, AutoDelete -> False, 
-          GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-          GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-            "Rows" -> {{Automatic}}}], "Grid"]}], "}"}]], "Output"], 
-  Cell["5. The variables (4.27)", "Section"], Cell["r12 = (a - k)/(a + k) and \
-r34 = (b - k)/(b + k). Substituting a = k (1 + r12)/(1 - r12) and b = k (1 + \
-r34)/(1 - r34), k times (4.24) does not depend on k. Physical kinematics is \
-the square 0 < r12, r34 < 1, and all positive momenta form the square -1 < \
-r12, r34 < 1.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{RowBox[{"rDelta", "[", RowBox[{"r1_", ",", "r2_", ",", "kk_"}], 
-          "]"}], ":=", RowBox[{"N", "[", RowBox[
-           {RowBox[{"kk", " ", RowBox[{"deltaClosed", "[", RowBox[
-                 {FractionBox[RowBox[{"kk", " ", RowBox[{"(", RowBox[
-                        {"1", "+", "r1"}], ")"}]}], RowBox[{"1", "-", 
-                     "r1"}]], ",", FractionBox[RowBox[{"kk", " ", RowBox[
-                      {"(", RowBox[{"1", "+", "r2"}], ")"}]}], RowBox[
-                    {"1", "-", "r2"}]], ",", "kk"}], "]"}]}], ",", "30"}], 
-          "]"}]}], ";", RowBox[{"checkNumerical", "[", 
-        RowBox[{"\"k (4.24) independent of k at r = (1/2, 1/3)\"", ",", 
-          RowBox[{"rDelta", "[", RowBox[{FractionBox["1", "2"], ",", 
-              FractionBox["1", "3"], ",", "1"}], "]"}], ",", 
-          RowBox[{"rDelta", "[", RowBox[{FractionBox["1", "2"], ",", 
-              FractionBox["1", "3"], ",", "5"}], "]"}], ",", "20"}], "]"}], 
-      ";", RowBox[{"checkNumerical", "[", 
-        RowBox[{"\"k (4.24) independent of k at r = (-1/2, 1/4)\"", ",", 
-          RowBox[{"rDelta", "[", RowBox[{RowBox[{"-", FractionBox["1", 
-                 "2"]}], ",", FractionBox["1", "4"], ",", "1"}], "]"}], ",", 
-          RowBox[{"rDelta", "[", RowBox[{RowBox[{"-", FractionBox["1", 
-                 "2"]}], ",", FractionBox["1", "4"], ",", "5"}], "]"}], ",", 
-          "20"}], "]"}], ";", RowBox[{"checkTrue", "[", 
-        RowBox[{"\"physical kinematics is 0 < r12, r34 < 1\"", ",", 
-          RowBox[{"Resolve", "[", RowBox[{RowBox[{SubscriptBox["\[ForAll]", 
-                 RowBox[{RowBox[{"{", RowBox[{"a", ",", "b", ",", "k"}], 
-                     "}"}], ",", RowBox[{RowBox[{"a", ">", "k", ">", "0"}], 
-                     "&&", RowBox[{"b", ">", "k"}]}]}]], RowBox[
-                 {"(", RowBox[{RowBox[{"0", "<", FractionBox[RowBox[{"a", 
-                         "-", "k"}], RowBox[{"a", "+", "k"}]], "<", "1"}], 
-                    "&&", RowBox[{"0", "<", FractionBox[RowBox[{"b", "-", 
-                         "k"}], RowBox[{"b", "+", "k"}]], "<", "1"}]}], 
-                  ")"}]}], ",", TemplateBox[{}, "Reals"]}], "]"}]}], "]"}], 
-      ";", RowBox[{"checkTrue", "[", RowBox[
-         {"\"positive momenta are -1 < r12, r34 < 1\"", ",", 
-          RowBox[{"Resolve", "[", RowBox[{RowBox[{SubscriptBox["\[ForAll]", 
-                 RowBox[{RowBox[{"{", RowBox[{"a", ",", "b", ",", "k"}], 
-                     "}"}], ",", RowBox[{RowBox[{"a", ">", "0"}], "&&", 
-                     RowBox[{"b", ">", "0"}], "&&", RowBox[{"k", ">", 
-                       "0"}]}]}]], RowBox[{"(", RowBox[{RowBox[
-                     {RowBox[{"-", "1"}], "<", FractionBox[RowBox[{"a", "-", 
-                         "k"}], RowBox[{"a", "+", "k"}]], "<", "1"}], "&&", 
-                    RowBox[{RowBox[{"-", "1"}], "<", FractionBox[RowBox[
-                        {"b", "-", "k"}], RowBox[{"b", "+", "k"}]], "<", 
-                      "1"}]}], ")"}]}], ",", TemplateBox[{}, "Reals"]}], 
-            "]"}]}], "]"}], ";", RowBox[{"checkTrue", "[", 
-        RowBox[{"\"0 < r < 1 gives a > k and b > k\"", ",", 
-          RowBox[{"Resolve", "[", RowBox[{RowBox[{SubscriptBox["\[ForAll]", 
-                 RowBox[{RowBox[{"{", RowBox[{"r1", ",", "r2", ",", "k"}], 
-                     "}"}], ",", RowBox[{RowBox[{"k", ">", "0"}], "&&", 
-                     RowBox[{"0", "<", "r1", "<", "1"}], "&&", RowBox[
-                      {"0", "<", "r2", "<", "1"}]}]}]], RowBox[
-                 {"(", RowBox[{RowBox[{FractionBox[RowBox[{"k", " ", RowBox[
-                          {"(", RowBox[{"1", "+", "r1"}], ")"}]}], RowBox[
-                        {"1", "-", "r1"}]], ">", "k"}], "&&", RowBox[
-                     {FractionBox[RowBox[{"k", " ", RowBox[{"(", RowBox[
-                          {"1", "+", "r2"}], ")"}]}], RowBox[{"1", "-", 
-                         "r2"}]], ">", "k"}]}], ")"}]}], ",", 
-              TemplateBox[{}, "Reals"]}], "]"}]}], "]"}], ";", 
-      RowBox[{"checkTrue", "[", RowBox[
-         {"\"-1 < r < 1 gives positive momenta\"", ",", 
-          RowBox[{"Resolve", "[", RowBox[{RowBox[{SubscriptBox["\[ForAll]", 
-                 RowBox[{RowBox[{"{", RowBox[{"r1", ",", "r2", ",", "k"}], 
-                     "}"}], ",", RowBox[{RowBox[{"k", ">", "0"}], "&&", 
-                     RowBox[{RowBox[{"-", "1"}], "<", "r1", "<", "1"}], "&&", 
-                     RowBox[{RowBox[{"-", "1"}], "<", "r2", "<", "1"}]}]}]], 
-                RowBox[{"(", RowBox[{RowBox[{FractionBox[RowBox[{"k", " ", 
-                         RowBox[{"(", RowBox[{"1", "+", "r1"}], ")"}]}], 
-                       RowBox[{"1", "-", "r1"}]], ">", "0"}], "&&", 
-                    RowBox[{FractionBox[RowBox[{"k", " ", RowBox[{"(", 
-                          RowBox[{"1", "+", "r2"}], ")"}]}], RowBox[{"1", 
-                         "-", "r2"}]], ">", "0"}]}], ")"}]}], ",", 
-              TemplateBox[{}, "Reals"]}], "]"}]}], "]"}], ";", 
-      RowBox[{"sectionRows", "[", "start", "]"}]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, {"\"k (4.24) independent of k at r = (1/2, 1/3)\"", 
-        "\"numerical\"", "0``28.220295029417123", "\"30 digits\""}, 
-       {"\"k (4.24) independent of k at r = (-1/2, 1/4)\"", "\"numerical\"", 
-        "0``27.731516409733466", "\"30 digits\""}, 
-       {"\"physical kinematics is 0 < r12, r34 < 1\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"positive momenta are -1 < r12, r34 < 1\"", 
-        "\"exact\"", "0", "\"identity\""}, 
-       {"\"0 < r < 1 gives a > k and b > k\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"-1 < r < 1 gives positive momenta\"", 
-        "\"exact\"", "0", "\"identity\""}}, GridBoxAlignment -> 
-       {"Columns" -> {{Left}}}, AutoDelete -> False, 
-      GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-      GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Grid"]], "Output"], 
-  Cell["6. Verification", "Section"], Cell["Landen's identity is checked for \
-r12 and r34, the first line of (4.20) and its image.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"Landen partner for r12\"", ",", 
-          RowBox[{"Together", "[", RowBox[{FractionBox["ra", RowBox[
-                {"ra", "-", "1"}]], "-", "na"}], "]"}]}], "]"}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"Landen logarithm for r12\"", ",", 
-          RowBox[{"PowerExpand", "[", RowBox[{SuperscriptBox[RowBox[
-                {"Log", "[", RowBox[{"Together", "[", RowBox[{"1", "-", 
-                     "ra"}], "]"}], "]"}], "2"], "-", SuperscriptBox["lA", 
-               "2"]}], "]"}]}], "]"}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"Landen partner for r34\"", ",", 
-          RowBox[{"Together", "[", RowBox[{FractionBox["rb", RowBox[
-                {"rb", "-", "1"}]], "-", "nb"}], "]"}]}], "]"}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"Landen logarithm for r34\"", ",", 
-          RowBox[{"PowerExpand", "[", RowBox[{SuperscriptBox[RowBox[
-                {"Log", "[", RowBox[{"Together", "[", RowBox[{"1", "-", 
-                     "rb"}], "]"}], "]"}], "2"], "-", SuperscriptBox["lB", 
-               "2"]}], "]"}]}], "]"}], ";", 
-      RowBox[{"sectionRows", "[", "start", "]"}]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, {"\"Landen partner for r12\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"Landen logarithm for r12\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"Landen partner for r34\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"Landen logarithm for r34\"", "\"exact\"", "0", 
-        "\"identity\""}}, GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-      AutoDelete -> False, GridBoxFrame -> {"Columns" -> {{True}}, 
-        "Rows" -> {{True}}}, GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Grid"]], "Output"], 
-  Cell["Both sides of the five-term relation (4.28) vanish at b = k, their \
-b-derivatives agree after the logarithms are reduced to Log[(a+k)/(2k)] and \
-Log[(b+k)/(2k)], and the relation is checked numerically, including a point \
-with k above both a and b.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{"fiveL", "=", RowBox[{"PolyLog", "[", 
-          RowBox[{"2", ",", "rab"}], "]"}]}], ";", 
-      RowBox[{"fiveR", "=", RowBox[{RowBox[{"PolyLog", "[", 
-            RowBox[{"2", ",", "ca"}], "]"}], "+", 
-          RowBox[{"PolyLog", "[", RowBox[{"2", ",", "cb"}], "]"}], "-", 
-          RowBox[{"PolyLog", "[", RowBox[{"2", ",", "na"}], "]"}], "-", 
-          RowBox[{"PolyLog", "[", RowBox[{"2", ",", "nb"}], "]"}], "-", 
-          RowBox[{"lA", " ", "lB"}]}]}], ";", 
-      RowBox[{"five", "=", RowBox[{"fiveL", "-", "fiveR"}]}], ";", 
-      RowBox[{"checkExact", "[", RowBox[
-         {"\"(4.28) left side vanishes at b = k\"", ",", 
-          RowBox[{"fiveL", "/.", "\[VeryThinSpace]", 
-            RowBox[{"b", "\[Rule]", "k"}]}]}], "]"}], ";", 
-      RowBox[{"checkExact", "[", RowBox[
-         {"\"(4.28) right side vanishes at b = k\"", ",", 
-          RowBox[{"fiveR", "/.", "\[VeryThinSpace]", 
-            RowBox[{"b", "\[Rule]", "k"}]}]}], "]"}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"(4.28) vanishes at b = k\"", ",", 
-          RowBox[{"FullSimplify", "[", RowBox[{RowBox[{"five", "/.", 
-                "\[VeryThinSpace]", RowBox[{"b", "\[Rule]", "k"}]}], ",", 
-              RowBox[{"Assumptions", "\[Rule]", RowBox[{RowBox[{"a", ">", 
-                    "0"}], "&&", RowBox[{"k", ">", "0"}]}]}]}], "]"}]}], 
-        "]"}], ";", RowBox[{"logTable", "=", 
-        RowBox[{"{", RowBox[{RowBox[{"{", RowBox[{FractionBox[RowBox[
-                  {"a", "+", "k"}], RowBox[{"2", " ", "k"}]], ",", "LA"}], 
-              "}"}], ",", RowBox[{"{", RowBox[{FractionBox[RowBox[{"b", "+", 
-                   "k"}], RowBox[{"2", " ", "k"}]], ",", "LB"}], "}"}], ",", 
-            RowBox[{"{", RowBox[{FractionBox[RowBox[{"a", "+", "b"}], 
-                 RowBox[{"2", " ", "k"}]], ",", "LE"}], "}"}], ",", 
-            RowBox[{"{", RowBox[{RowBox[{"1", "-", "ra"}], ",", 
-                RowBox[{"-", "LA"}]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{RowBox[{"1", "-", "rb"}], ",", 
-                RowBox[{"-", "LB"}]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{RowBox[{"1", "-", "na"}], ",", "LA"}], 
-              "}"}], ",", RowBox[{"{", RowBox[{RowBox[{"1", "-", "nb"}], ",", 
-                "LB"}], "}"}], ",", RowBox[{"{", RowBox[{RowBox[{"1", "-", 
-                  "ca"}], ",", RowBox[{"LE", "-", "LB"}]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{RowBox[{"1", "-", "cb"}], ",", 
-                RowBox[{"LE", "-", "LA"}]}], "}"}], ",", 
-            RowBox[{"{", RowBox[{RowBox[{"1", "-", "rab"}], ",", 
-                RowBox[{"LE", "-", "LA", "-", "LB"}]}], "}"}]}], "}"}]}], 
-      ";", RowBox[{RowBox[{"reduceLog", "[", "z_", "]"}], ":=", 
-        RowBox[{"Module", "[", RowBox[{RowBox[{"{", RowBox[{"hits", "=", 
-                RowBox[{"Select", "[", RowBox[{"logTable", ",", RowBox[
-                     {RowBox[{RowBox[{"Together", "[", RowBox[{"z", "-", 
-                          RowBox[{"#1", "\[LeftDoubleBracket]", "1", 
-                          "\[RightDoubleBracket]"}]}], "]"}], "===", "0"}], 
-                      "&"}]}], "]"}]}], "}"}], ",", 
-            RowBox[{"If", "[", RowBox[{RowBox[{"hits", "===", RowBox[
-                   {"{", "}"}]}], ",", RowBox[{"unhandledLog", "[", "z", 
-                  "]"}], ",", RowBox[{"hits", "\[LeftDoubleBracket]", 
-                  RowBox[{"1", ",", "2"}], "\[RightDoubleBracket]"}]}], 
-              "]"}]}], "]"}]}], ";", 
-      RowBox[{RowBox[{"reduceLogs", "[", "e_", "]"}], ":=", 
-        RowBox[{RowBox[{"e", "/.", "\[VeryThinSpace]", 
-            RowBox[{RowBox[{"PolyLog", "[", RowBox[{"1", ",", "z_"}], "]"}], 
-              "\[RuleDelayed]", RowBox[{"-", RowBox[{"Log", "[", 
-                  RowBox[{"1", "-", "z"}], "]"}]}]}]}], "/.", 
-          "\[VeryThinSpace]", RowBox[{RowBox[{"Log", "[", "z_", "]"}], 
-            "\[RuleDelayed]", RowBox[{"reduceLog", "[", "z", "]"}]}]}]}], 
-      ";", RowBox[{"logsSub", "=", RowBox[
-         {"{", RowBox[{RowBox[{"lA", "\[Rule]", RowBox[{"Log", "[", 
-                FractionBox[RowBox[{"a", "+", "k"}], RowBox[{"2", " ", 
-                   "k"}]], "]"}]}], ",", RowBox[{"lB", "\[Rule]", 
-              RowBox[{"Log", "[", FractionBox[RowBox[{"b", "+", "k"}], 
-                 RowBox[{"2", " ", "k"}]], "]"}]}]}], "}"}]}], ";", 
-      RowBox[{"fiveDeriv", "=", RowBox[{"Cancel", "[", 
-          RowBox[{"Together", "[", RowBox[{"reduceLogs", "[", 
-              RowBox[{SubscriptBox["\[PartialD]", RowBox[{"b"}]], 
-                RowBox[{"(", RowBox[{"five", "/.", "\[VeryThinSpace]", 
-                    "logsSub"}], ")"}]}], "]"}], "]"}], "]"}]}], ";", 
-      RowBox[{"checkExact", "[", RowBox[{"\"(4.28) b-derivatives agree\"", 
-          ",", "fiveDeriv"}], "]"}], ";", 
-      RowBox[{"Do", "[", RowBox[{RowBox[{"checkNumerical", "[", 
-            RowBox[{RowBox[{"\"(4.28) at \"", "<>", RowBox[{"ToString", "[", 
-                  RowBox[{"N", "[", RowBox[{"pt", ",", "2"}], "]"}], "]"}]}], 
-              ",", RowBox[{"fiveL", "/.", "\[VeryThinSpace]", RowBox[
-                 {"{", RowBox[{RowBox[{"a", "\[Rule]", RowBox[{"pt", 
-                        "\[LeftDoubleBracket]", "1", 
-                        "\[RightDoubleBracket]"}]}], ",", RowBox[{"b", 
-                      "\[Rule]", RowBox[{"pt", "\[LeftDoubleBracket]", "2", 
-                        "\[RightDoubleBracket]"}]}], ",", RowBox[{"k", 
-                      "\[Rule]", RowBox[{"pt", "\[LeftDoubleBracket]", "3", 
-                        "\[RightDoubleBracket]"}]}]}], "}"}]}], ",", 
-              RowBox[{"fiveR", "/.", "\[VeryThinSpace]", RowBox[
-                 {"{", RowBox[{RowBox[{"a", "\[Rule]", RowBox[{"pt", 
-                        "\[LeftDoubleBracket]", "1", 
-                        "\[RightDoubleBracket]"}]}], ",", RowBox[{"b", 
-                      "\[Rule]", RowBox[{"pt", "\[LeftDoubleBracket]", "2", 
-                        "\[RightDoubleBracket]"}]}], ",", RowBox[{"k", 
-                      "\[Rule]", RowBox[{"pt", "\[LeftDoubleBracket]", "3", 
-                        "\[RightDoubleBracket]"}]}]}], "}"}]}], ",", "20"}], 
-            "]"}], ",", RowBox[{"{", RowBox[{"pt", ",", RowBox[{"{", 
-                RowBox[{RowBox[{"{", RowBox[{FractionBox["13", "10"], ",", 
-                      FractionBox["17", "10"], ",", FractionBox["7", "10"]}], 
-                    "}"}], ",", RowBox[{"{", RowBox[{FractionBox["4", "5"], 
-                      ",", FractionBox["3", "2"], ",", FractionBox["5", 
-                       "2"]}], "}"}], ",", RowBox[{"{", RowBox[{"2", ",", 
-                      "3", ",", "1"}], "}"}]}], "}"}]}], "}"}]}], "]"}], ";", 
-      RowBox[{"sectionRows", "[", "start", "]"}]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, {"\"(4.28) left side vanishes at b = k\"", 
-        "\"exact\"", "0", "\"identity\""}, 
-       {"\"(4.28) right side vanishes at b = k\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"(4.28) vanishes at b = k\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"(4.28) b-derivatives agree\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"(4.28) at {1.3, 1.7, 0.70}\"", "\"numerical\"", 
-        "0``30.587909692713065", "\"30 digits\""}, 
-       {"\"(4.28) at {0.80, 1.5, 2.5}\"", "\"numerical\"", 
-        "0``30.574496572759763", "\"30 digits\""}, 
-       {"\"(4.28) at {2.0, 3.0, 1.0}\"", "\"numerical\"", 
-        "0``30.457972808367153", "\"30 digits\""}}, GridBoxAlignment -> 
-       {"Columns" -> {{Left}}}, AutoDelete -> False, 
-      GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-      GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Grid"]], "Output"], 
-  Cell["The k-derivative of (4.24), reduced with Landen and (4.28), equals 2 \
-k times (4.21). As k goes to infinity the trilogarithm arguments tend to -1, \
-1/2, 1 and 1, and P+ and P- tend to 0. Equation (4.24) is compared with the \
-integral (4.22) at (1.3, 1.7, 0.7), and with direct integration of (3.17), \
-with [PZP] as in (4.23), at (1.3, 1.7, 0.7) and (0.8, 1.5, 2.5). The \
-benchmark values are the reference.", "Text"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{"liTable", "=", RowBox[{"{", RowBox[
-           {RowBox[{"{", RowBox[{"ra", ",", RowBox[{RowBox[{"-", RowBox[
-                     {"PolyLog", "[", RowBox[{"2", ",", "na"}], "]"}]}], "-", 
-                  FractionBox[SuperscriptBox["LA", "2"], "2"]}]}], "}"}], 
-            ",", RowBox[{"{", RowBox[{"rb", ",", RowBox[{RowBox[{"-", 
-                    RowBox[{"PolyLog", "[", RowBox[{"2", ",", "nb"}], 
-                      "]"}]}], "-", FractionBox[SuperscriptBox["LB", "2"], 
-                   "2"]}]}], "}"}], ",", RowBox[{"{", RowBox[{"rab", ",", 
-                RowBox[{RowBox[{"PolyLog", "[", RowBox[{"2", ",", "ca"}], 
-                    "]"}], "+", RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                      "cb"}], "]"}], "-", RowBox[{"PolyLog", "[", RowBox[
-                     {"2", ",", "na"}], "]"}], "-", RowBox[{"PolyLog", "[", 
-                    RowBox[{"2", ",", "nb"}], "]"}], "-", RowBox[{"LA", " ", 
-                    "LB"}]}]}], "}"}]}], "}"}]}], ";", 
-      RowBox[{RowBox[{"reduceLi", "[", "z_", "]"}], ":=", 
-        RowBox[{"Module", "[", RowBox[{RowBox[{"{", RowBox[{"hits", "=", 
-                RowBox[{"Select", "[", RowBox[{"liTable", ",", RowBox[
-                     {RowBox[{RowBox[{"Together", "[", RowBox[{"z", "-", 
-                          RowBox[{"#1", "\[LeftDoubleBracket]", "1", 
-                          "\[RightDoubleBracket]"}]}], "]"}], "===", "0"}], 
-                      "&"}]}], "]"}]}], "}"}], ",", 
-            RowBox[{"If", "[", RowBox[{RowBox[{"hits", "===", RowBox[
-                   {"{", "}"}]}], ",", RowBox[{"PolyLog", "[", RowBox[
-                   {"2", ",", "z"}], "]"}], ",", RowBox[{"hits", 
-                  "\[LeftDoubleBracket]", RowBox[{"1", ",", "2"}], 
-                  "\[RightDoubleBracket]"}]}], "]"}]}], "]"}]}], ";", 
-      RowBox[{RowBox[{"reduceAll", "[", "e_", "]"}], ":=", 
-        RowBox[{"Cancel", "[", RowBox[{"Together", "[", 
-            RowBox[{RowBox[{"reduceLogs", "[", "e", "]"}], "/.", 
-              "\[VeryThinSpace]", RowBox[{RowBox[{"PolyLog", "[", 
-                  RowBox[{"2", ",", "z_"}], "]"}], "\[RuleDelayed]", 
-                RowBox[{"reduceLi", "[", "z", "]"}]}]}], "]"}], "]"}]}], ";", 
-      RowBox[{RowBox[{"result421", "[", RowBox[{"u_", ",", "v_", ",", "t_"}], 
-          "]"}], ":=", FractionBox[RowBox[{SuperscriptBox["\[Pi]", "3"], " ", 
-           RowBox[{"(", RowBox[{FractionBox[RowBox[{RowBox[{"PolyLog", "[", 
-                    RowBox[{"2", ",", RowBox[{"-", FractionBox[RowBox[
-                          {"v", "-", "t"}], RowBox[{"u", "+", "t"}]]}]}], 
-                    "]"}], "-", RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                      RowBox[{"-", FractionBox[RowBox[{"v", "-", "t"}], 
-                         RowBox[{"2", " ", "t"}]]}]}], "]"}], "+", 
-                  RowBox[{FractionBox["1", "2"], " ", SuperscriptBox[
-                     RowBox[{"Log", "[", FractionBox[RowBox[{"u", "+", "t"}], 
-                        RowBox[{"2", " ", "t"}]], "]"}], "2"]}]}], 
-                RowBox[{RowBox[{"(", RowBox[{"u", "-", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "+", "t"}], ")"}]}]], "+", 
-               FractionBox[RowBox[{RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                      RowBox[{"-", FractionBox[RowBox[{"u", "-", "t"}], 
-                         RowBox[{"v", "+", "t"}]]}]}], "]"}], "-", 
-                  RowBox[{"PolyLog", "[", RowBox[{"2", ",", RowBox[{"-", 
-                        FractionBox[RowBox[{"u", "-", "t"}], RowBox[{"2", 
-                          " ", "t"}]]}]}], "]"}], "+", RowBox[{FractionBox[
-                     "1", "2"], " ", SuperscriptBox[RowBox[{"Log", "[", 
-                       FractionBox[RowBox[{"v", "+", "t"}], RowBox[{"2", " ", 
-                          "t"}]], "]"}], "2"]}]}], RowBox[
-                 {RowBox[{"(", RowBox[{"u", "+", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "-", "t"}], ")"}]}]], "+", 
-               FractionBox[RowBox[{RowBox[{"Log", "[", FractionBox[RowBox[
-                      {"u", "+", "t"}], RowBox[{"2", " ", "t"}]], "]"}], " ", 
-                  RowBox[{"Log", "[", FractionBox[RowBox[{"v", "+", "t"}], 
-                     RowBox[{"2", " ", "t"}]], "]"}]}], RowBox[
-                 {RowBox[{"(", RowBox[{"u", "-", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "-", "t"}], ")"}]}]], "-", 
-               FractionBox[RowBox[{RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                      RowBox[{"-", FractionBox[RowBox[{"u", "-", "t"}], 
-                         RowBox[{"2", " ", "t"}]]}]}], "]"}], "+", 
-                  RowBox[{"PolyLog", "[", RowBox[{"2", ",", RowBox[{"-", 
-                        FractionBox[RowBox[{"v", "-", "t"}], RowBox[{"2", 
-                          " ", "t"}]]}]}], "]"}], "+", FractionBox[
-                   SuperscriptBox["\[Pi]", "2"], "6"]}], RowBox[
-                 {RowBox[{"(", RowBox[{"u", "+", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "+", "t"}], ")"}]}]]}], ")"}]}], 
-         "t"]}], ";", RowBox[{"deltaExpr", "=", 
-        RowBox[{"2", " ", SuperscriptBox["\[Pi]", "3"], " ", 
-          RowBox[{"(", RowBox[{FractionBox["pPlus", RowBox[{"a", "+", "b"}]], 
-              "+", FractionBox["pMinus", RowBox[{"a", "-", "b"}]]}], 
-            ")"}]}]}], ";", RowBox[{"fullDerivativeResidual", "=", 
-        RowBox[{RowBox[{SubscriptBox["\[PartialD]", RowBox[{"k"}]], 
-            "deltaExpr"}], "-", RowBox[{"2", " ", "k", " ", 
-            RowBox[{"result421", "[", RowBox[{"a", ",", "b", ",", "k"}], 
-              "]"}]}]}]}], ";", RowBox[{"checkExact", "[", 
-        RowBox[{"\"derivative of (4.24) equals (4.21)\"", ",", 
-          RowBox[{"Cancel", "[", RowBox[{"Together", "[", 
-              RowBox[{RowBox[{"reduceAll", "[", "fullDerivativeResidual", 
-                  "]"}], "/.", "\[VeryThinSpace]", RowBox[{"{", RowBox[
-                   {RowBox[{"LA", "\[Rule]", "lA"}], ",", RowBox[{"LB", 
-                      "\[Rule]", "lB"}], ",", RowBox[{"LE", "\[Rule]", 
-                      RowBox[{"Log", "[", FractionBox[RowBox[{"a", "+", 
-                          "b"}], RowBox[{"2", " ", "k"}]], "]"}]}]}], 
-                  "}"}]}], "]"}], "]"}]}], "]"}], ";", 
-      RowBox[{"sectionRows", "[", "start", "]"}]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, {"\"derivative of (4.24) equals (4.21)\"", 
-        "\"exact\"", "0", "\"identity\""}}, GridBoxAlignment -> 
-       {"Columns" -> {{Left}}}, AutoDelete -> False, 
-      GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-      GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Grid"]], "Output"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{"argLimits", "=", RowBox[{"Limit", "[", 
-          RowBox[{RowBox[{"{", RowBox[{"ra", ",", "rb", ",", "na", ",", "nb", 
-                ",", "rab", ",", "ca", ",", "cb"}], "}"}], ",", 
-            RowBox[{"k", "\[Rule]", "\[Infinity]"}], ",", 
-            RowBox[{"Assumptions", "\[Rule]", RowBox[{RowBox[{"a", ">", 
-                  "0"}], "&&", RowBox[{"b", ">", "0"}]}]}]}], "]"}]}], ";", 
-      RowBox[{"checkExact", "[", RowBox[
-         {"\"trilogarithm limits -1, 1/2, 1 and 1\"", ",", 
-          RowBox[{"Total", "[", RowBox[{"argLimits", "-", RowBox[{"{", 
-                RowBox[{RowBox[{"-", "1"}], ",", RowBox[{"-", "1"}], ",", 
-                  FractionBox["1", "2"], ",", FractionBox["1", "2"], ",", 
-                  "1", ",", "1", ",", "1"}], "}"}]}], "]"}]}], "]"}], ";", 
-      RowBox[{RowBox[{"limitPoly", "[", "e_", "]"}], ":=", 
-        RowBox[{"e", "/.", "\[VeryThinSpace]", 
-          RowBox[{"{", RowBox[{RowBox[{RowBox[{"PolyLog", "[", RowBox[
-                   {"n_", ",", "z_"}], "]"}], "\[RuleDelayed]", 
-                RowBox[{"PolyLog", "[", RowBox[{"n", ",", RowBox[{"Limit", 
-                      "[", RowBox[{"z", ",", RowBox[{"k", "\[Rule]", 
-                          "\[Infinity]"}], ",", RowBox[{"Assumptions", 
-                          "\[Rule]", RowBox[{RowBox[{"a", ">", "0"}], "&&", 
-                          RowBox[{"b", ">", "0"}]}]}]}], "]"}]}], "]"}]}], 
-              ",", RowBox[{"lA", "\[Rule]", RowBox[{"-", RowBox[{"Log", "[", 
-                    "2", "]"}]}]}], ",", RowBox[{"lB", "\[Rule]", 
-                RowBox[{"-", RowBox[{"Log", "[", "2", "]"}]}]}]}], "}"}]}]}], 
-      ";", RowBox[{"checkExact", "[", RowBox[{"\"P+ tends to 0\"", ",", 
-          RowBox[{"FunctionExpand", "[", RowBox[{"limitPoly", "[", "pPlus", 
-              "]"}], "]"}]}], "]"}], ";", RowBox[{"checkExact", "[", 
-        RowBox[{"\"P- tends to 0\"", ",", RowBox[{"FunctionExpand", "[", 
-            RowBox[{"limitPoly", "[", "pMinus", "]"}], "]"}]}], "]"}], ";", 
-      RowBox[{"sectionRows", "[", "start", "]"}]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, {"\"trilogarithm limits -1, 1/2, 1 and 1\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"P+ tends to 0\"", "\"exact\"", 
-        "0", "\"identity\""}, {"\"P- tends to 0\"", "\"exact\"", "0", 
-        "\"identity\""}}, GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-      AutoDelete -> False, GridBoxFrame -> {"Columns" -> {{True}}, 
-        "Rows" -> {{True}}}, GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Grid"]], "Output"], 
-  Cell[BoxData[RowBox[{RowBox[{"start", "=", 
-        RowBox[{RowBox[{"Length", "[", "checks", "]"}], "+", "1"}]}], ";", 
-      RowBox[{RowBox[{"result421", "[", RowBox[{"u_", ",", "v_", ",", "t_"}], 
-          "]"}], ":=", FractionBox[RowBox[{SuperscriptBox["\[Pi]", "3"], " ", 
-           RowBox[{"(", RowBox[{FractionBox[RowBox[{RowBox[{"PolyLog", "[", 
-                    RowBox[{"2", ",", RowBox[{"-", FractionBox[RowBox[
-                          {"v", "-", "t"}], RowBox[{"u", "+", "t"}]]}]}], 
-                    "]"}], "-", RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                      RowBox[{"-", FractionBox[RowBox[{"v", "-", "t"}], 
-                         RowBox[{"2", " ", "t"}]]}]}], "]"}], "+", 
-                  RowBox[{FractionBox["1", "2"], " ", SuperscriptBox[
-                     RowBox[{"Log", "[", FractionBox[RowBox[{"u", "+", "t"}], 
-                        RowBox[{"2", " ", "t"}]], "]"}], "2"]}]}], 
-                RowBox[{RowBox[{"(", RowBox[{"u", "-", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "+", "t"}], ")"}]}]], "+", 
-               FractionBox[RowBox[{RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                      RowBox[{"-", FractionBox[RowBox[{"u", "-", "t"}], 
-                         RowBox[{"v", "+", "t"}]]}]}], "]"}], "-", 
-                  RowBox[{"PolyLog", "[", RowBox[{"2", ",", RowBox[{"-", 
-                        FractionBox[RowBox[{"u", "-", "t"}], RowBox[{"2", 
-                          " ", "t"}]]}]}], "]"}], "+", RowBox[{FractionBox[
-                     "1", "2"], " ", SuperscriptBox[RowBox[{"Log", "[", 
-                       FractionBox[RowBox[{"v", "+", "t"}], RowBox[{"2", " ", 
-                          "t"}]], "]"}], "2"]}]}], RowBox[
-                 {RowBox[{"(", RowBox[{"u", "+", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "-", "t"}], ")"}]}]], "+", 
-               FractionBox[RowBox[{RowBox[{"Log", "[", FractionBox[RowBox[
-                      {"u", "+", "t"}], RowBox[{"2", " ", "t"}]], "]"}], " ", 
-                  RowBox[{"Log", "[", FractionBox[RowBox[{"v", "+", "t"}], 
-                     RowBox[{"2", " ", "t"}]], "]"}]}], RowBox[
-                 {RowBox[{"(", RowBox[{"u", "-", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "-", "t"}], ")"}]}]], "-", 
-               FractionBox[RowBox[{RowBox[{"PolyLog", "[", RowBox[{"2", ",", 
-                      RowBox[{"-", FractionBox[RowBox[{"u", "-", "t"}], 
-                         RowBox[{"2", " ", "t"}]]}]}], "]"}], "+", 
-                  RowBox[{"PolyLog", "[", RowBox[{"2", ",", RowBox[{"-", 
-                        FractionBox[RowBox[{"v", "-", "t"}], RowBox[{"2", 
-                          " ", "t"}]]}]}], "]"}], "+", FractionBox[
-                   SuperscriptBox["\[Pi]", "2"], "6"]}], RowBox[
-                 {RowBox[{"(", RowBox[{"u", "+", "t"}], ")"}], " ", 
-                  RowBox[{"(", RowBox[{"v", "+", "t"}], ")"}]}]]}], ")"}]}], 
-         "t"]}], ";", RowBox[{"tail", "=", 
-        RowBox[{"-", RowBox[{"NIntegrate", "[", RowBox[
-             {RowBox[{"2", " ", "t", " ", RowBox[{"result421", "[", 
-                  RowBox[{FractionBox["13", "10"], ",", FractionBox["17", 
-                     "10"], ",", "t"}], "]"}]}], ",", RowBox[{"{", 
-                RowBox[{"t", ",", FractionBox["7", "10"], ",", FractionBox[
-                   "13", "10"], ",", FractionBox["17", "10"], ",", "10", ",", 
-                  "\[Infinity]"}], "}"}], ",", RowBox[{"WorkingPrecision", 
-                "\[Rule]", "20"}], ",", RowBox[{"PrecisionGoal", "\[Rule]", 
-                "12"}], ",", RowBox[{"MaxRecursion", "\[Rule]", "12"}], ",", 
-              RowBox[{"Method", "\[Rule]", RowBox[{"{", RowBox[
-                   {"\"GlobalAdaptive\"", ",", RowBox[
-                     {"\"SymbolicProcessing\"", "\[Rule]", "0"}]}], 
-                  "}"}]}]}], "]"}]}]}], ";", 
-      RowBox[{"checkNumerical", "[", RowBox[
-         {"\"(4.24) equals (4.22) at (1.3, 1.7, 0.7)\"", ",", 
-          RowBox[{"deltaClosed", "[", RowBox[{FractionBox["13", "10"], ",", 
-              FractionBox["17", "10"], ",", FractionBox["7", "10"]}], "]"}], 
-          ",", "tail", ",", "12"}], "]"}], ";", 
-      RowBox[{RowBox[{"t0", "[", RowBox[{"c_", ",", "pp_"}], "]"}], ":=", 
-        FractionBox["c", RowBox[{SuperscriptBox["pp", "2"], "+", 
-           SuperscriptBox["c", "2"]}]]}], ";", 
-      RowBox[{RowBox[{"t1", "[", RowBox[{"c_", ",", "pp_"}], "]"}], ":=", 
-        RowBox[{"-", RowBox[{"Re", "[", FractionBox[RowBox[{"EulerGamma", 
-               "+", RowBox[{"Log", "[", RowBox[{"c", "-", RowBox[
-                    {"\[ImaginaryI]", " ", "pp"}]}], "]"}]}], 
-             RowBox[{"c", "-", RowBox[{"\[ImaginaryI]", " ", "pp"}]}]], 
-            "]"}]}]}], ";", RowBox[
-       {RowBox[{"t2", "[", RowBox[{"c_", ",", "pp_"}], "]"}], ":=", 
-        RowBox[{"Re", "[", FractionBox[RowBox[{SuperscriptBox[
-              RowBox[{"(", RowBox[{"EulerGamma", "+", RowBox[{"Log", "[", 
-                    RowBox[{"c", "-", RowBox[{"\[ImaginaryI]", " ", "pp"}]}], 
-                    "]"}]}], ")"}], "2"], "+", FractionBox[SuperscriptBox[
-               "\[Pi]", "2"], "6"]}], RowBox[{"c", "-", 
-             RowBox[{"\[ImaginaryI]", " ", "pp"}]}]], "]"}]}], ";", 
-      RowBox[{RowBox[{"line", "[", "f_", "]"}], ":=", 
-        RowBox[{"2", " ", RowBox[{"NIntegrate", "[", 
-            RowBox[{RowBox[{"f", "[", "pp", "]"}], ",", RowBox[{"{", 
-                RowBox[{"pp", ",", "0", ",", "1", ",", "10", ",", 
-                  "\[Infinity]"}], "}"}], ",", RowBox[{"WorkingPrecision", 
-                "\[Rule]", "16"}], ",", RowBox[{"PrecisionGoal", "\[Rule]", 
-                "10"}], ",", RowBox[{"MaxRecursion", "\[Rule]", "10"}], ",", 
-              RowBox[{"Method", "\[Rule]", RowBox[{"{", RowBox[
-                   {"\"GlobalAdaptive\"", ",", RowBox[
-                     {"\"SymbolicProcessing\"", "\[Rule]", "0"}]}], 
-                  "}"}]}]}], "]"}]}]}], ";", 
-      RowBox[{RowBox[{"deltaDirect", "[", RowBox[{"u_", ",", "v_", ",", 
-            "t_"}], "]"}], ":=", RowBox[{"Module", "[", 
-          RowBox[{RowBox[{"{", RowBox[{"line1", ",", "pzp"}], "}"}], ",", 
-            RowBox[{RowBox[{"line1", "=", RowBox[{"line", "[", RowBox[
-                   {"Function", "[", RowBox[{"pp", ",", RowBox[{"Module", 
-                        "[", RowBox[{RowBox[{"{", RowBox[{"mom", "=", RowBox[
-                          {"Log", "[", RowBox[{SuperscriptBox["pp", "2"], 
-                          "+", SuperscriptBox["t", "2"]}], "]"}]}], "}"}], 
-                          ",", RowBox[{RowBox[{"mom", " ", RowBox[{"(", 
-                          RowBox[{RowBox[{RowBox[{"t2", "[", RowBox[{"u", 
-                          ",", "pp"}], "]"}], " ", RowBox[{"t0", "[", RowBox[
-                          {"v", ",", "pp"}], "]"}]}], "-", RowBox[{"2", " ", 
-                          RowBox[{"t1", "[", RowBox[{"u", ",", "pp"}], "]"}], 
-                          " ", RowBox[{"t1", "[", RowBox[{"v", ",", "pp"}], 
-                          "]"}]}], "+", RowBox[{RowBox[{"t0", "[", RowBox[
-                          {"u", ",", "pp"}], "]"}], " ", RowBox[{"t2", "[", 
-                          RowBox[{"v", ",", "pp"}], "]"}]}]}], ")"}]}], "-", 
-                          RowBox[{SuperscriptBox["mom", "2"], " ", RowBox[
-                          {"(", RowBox[{RowBox[{RowBox[{"t1", "[", RowBox[
-                          {"u", ",", "pp"}], "]"}], " ", RowBox[{"t0", "[", 
-                          RowBox[{"v", ",", "pp"}], "]"}]}], "+", RowBox[
-                          {RowBox[{"t0", "[", RowBox[{"u", ",", "pp"}], 
-                          "]"}], " ", RowBox[{"t1", "[", RowBox[{"v", ",", 
-                          "pp"}], "]"}]}]}], ")"}]}]}]}], "]"}]}], "]"}], 
-                  "]"}]}], ";", RowBox[{"pzp", "=", RowBox[{"Block", "[", 
-                  RowBox[{RowBox[{"{", RowBox[{"$MaxExtraPrecision", "=", 
-                        "20"}], "}"}], ",", RowBox[{"NIntegrate", "[", 
-                      RowBox[{RowBox[{"2", " ", RowBox[{"Log", "[", "z", 
-                          "]"}], " ", RowBox[{"F", "[", RowBox[{"u", ",", 
-                          "t", ",", "z"}], "]"}], " ", RowBox[{"F", "[", 
-                          RowBox[{"v", ",", "t", ",", "z"}], "]"}]}], ",", 
-                        RowBox[{"{", RowBox[{"z", ",", "0", ",", "1", ",", 
-                          "10", ",", "\[Infinity]"}], "}"}], ",", RowBox[
-                         {"WorkingPrecision", "\[Rule]", "16"}], ",", 
-                        RowBox[{"PrecisionGoal", "\[Rule]", "10"}], ",", 
-                        RowBox[{"MaxRecursion", "\[Rule]", "10"}], ",", 
-                        RowBox[{"Method", "\[Rule]", RowBox[{"{", RowBox[
-                          {"\"GlobalAdaptive\"", ",", RowBox[
-                          {"\"SymbolicProcessing\"", "\[Rule]", "0"}]}], 
-                          "}"}]}]}], "]"}]}], "]"}]}], ";", 
-              RowBox[{RowBox[{RowBox[{"-", SuperscriptBox["\[Pi]", "2"]}], 
-                  " ", "line1"}], "-", RowBox[{"\[Pi]", " ", "pzp"}]}]}]}], 
-          "]"}]}], ";", RowBox[{"direct1", "=", 
-        RowBox[{"deltaDirect", "[", RowBox[{FractionBox["13", "10"], ",", 
-            FractionBox["17", "10"], ",", FractionBox["7", "10"]}], "]"}]}], 
-      ";", RowBox[{"direct2", "=", RowBox[{"deltaDirect", "[", 
-          RowBox[{FractionBox["4", "5"], ",", FractionBox["3", "2"], ",", 
-            FractionBox["5", "2"]}], "]"}]}], ";", 
-      RowBox[{"checkNumerical", "[", RowBox[
-         {"\"(3.17) against (4.24) at (1.3, 1.7, 0.7)\"", ",", "direct1", 
-          ",", RowBox[{"deltaClosed", "[", RowBox[{FractionBox["13", "10"], 
-              ",", FractionBox["17", "10"], ",", FractionBox["7", "10"]}], 
-            "]"}], ",", "12"}], "]"}], ";", 
-      RowBox[{"checkNumerical", "[", RowBox[
-         {"\"(3.17) against (4.24) at (0.8, 1.5, 2.5)\"", ",", "direct2", 
-          ",", RowBox[{"deltaClosed", "[", RowBox[{FractionBox["4", "5"], 
-              ",", FractionBox["3", "2"], ",", FractionBox["5", "2"]}], 
-            "]"}], ",", "12"}], "]"}], ";", 
-      RowBox[{"checkNumerical", "[", RowBox[
-         {"\"(4.24) benchmark (1.3, 1.7, 0.7)\"", ",", 
-          RowBox[{"deltaClosed", "[", RowBox[{FractionBox["13", "10"], ",", 
-              FractionBox["17", "10"], ",", FractionBox["7", "10"]}], "]"}], 
-          ",", RowBox[{"bench", "[", "\"53.72228102717731347635\"", "]"}], 
-          ",", "18"}], "]"}], ";", RowBox[{"checkNumerical", "[", 
-        RowBox[{"\"(4.24) benchmark (0.8, 1.5, 2.5)\"", ",", 
-          RowBox[{"deltaClosed", "[", RowBox[{FractionBox["4", "5"], ",", 
-              FractionBox["3", "2"], ",", FractionBox["5", "2"]}], "]"}], 
-          ",", RowBox[{"bench", "[", "\"61.0891346962119487129\"", "]"}], 
-          ",", "18"}], "]"}], ";", RowBox[{"sectionRows", "[", "start", 
-        "]"}]}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, {"\"(4.24) equals (4.22) at (1.3, 1.7, 0.7)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "1.64723193196158419209`0.4822789344420582*^-18"}], 
-        "\"19 digits\""}, {"\"(3.17) against (4.24) at (1.3, 1.7, 0.7)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "1.7735045304453009197247892`2.5186774235641214*^-12"}], 
-        "\"13 digits\""}, {"\"(3.17) against (4.24) at (0.8, 1.5, 2.5)\"", 
-        "\"numerical\"", 
-        "9.301947060512767432093439`0.48984385992473134*^-14", 
-        "\"14 digits\""}, {"\"(4.24) benchmark (1.3, 1.7, 0.7)\"", 
-        "\"numerical\"", "2.93558482786854527`5.43651019442017*^-21", 
-        "\"22 digits\""}, {"\"(4.24) benchmark (0.8, 1.5, 2.5)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "2.09354917265637593`5.233889196698399*^-21"}], "\"22 digits\""}}, 
-      GridBoxAlignment -> {"Columns" -> {{Left}}}, AutoDelete -> False, 
-      GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
-      GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
-        "Rows" -> {{Automatic}}}], "Grid"]], "Output"], 
-  Cell["7. Summary", "Section"], Cell["Every check above is listed with its \
-kind and its residual. An exact residual is an identity. A numerical \
-agreement is the number of digits reached, not a certified error bound.", 
-   "Text"], Cell[BoxData[RowBox[{"Grid", "[", 
-      RowBox[{RowBox[{"Prepend", "[", RowBox[
-           {RowBox[{"Values", "/@", "checks"}], ",", 
-            RowBox[{"{", RowBox[{"\"check\"", ",", "\"kind\"", ",", 
-                "\"residual\"", ",", "\"agreement\""}], "}"}]}], "]"}], ",", 
-        RowBox[{"Frame", "\[Rule]", "All"}], ",", 
-        RowBox[{"Alignment", "\[Rule]", "Left"}]}], "]"}]], "Input"], 
-  Cell[BoxData[TagBox[GridBox[{{"\"check\"", "\"kind\"", "\"residual\"", 
-        "\"agreement\""}, 
-       {"\"F against LevinRule at {1.300, 0.7000, 0.2500}\"", 
-        "\"numerical\"", "7.741956663008475987`3.7938460695235103*^-19", 
-        "\"18 digits\""}, 
-       {"\"F against LevinRule at {1.300, 0.7000, 1.000}\"", "\"numerical\"", 
-        RowBox[{"-", "3.43137044816134840796`4.206372251231783*^-18"}], 
-        "\"17 digits\""}, 
-       {"\"F against LevinRule at {1.300, 0.7000, 3.000}\"", "\"numerical\"", 
-        "2.08612455248485586`2.520622777673855*^-20", "\"19 digits\""}, 
-       {"\"F against LevinRule at {0.8000, 2.500, 0.2500}\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "1.116504156349051701961`4.047885905214284*^-17"}], 
-        "\"17 digits\""}, 
-       {"\"F against LevinRule at {0.8000, 2.500, 1.200}\"", "\"numerical\"", 
-        RowBox[{"-", "6.72278412033719935763`4.204804276081506*^-18"}], 
-        "\"17 digits\""}, 
-       {"\"F against LevinRule at {0.8000, 2.500, 3.000}\"", "\"numerical\"", 
-        "5.21858611368754273753`4.724888480582574*^-18", "\"17 digits\""}, 
-       {"\"F against LevinRule at {1.000, 1.000, 0.2500}\"", "\"numerical\"", 
-        "5.9554007923749326463`3.3223888525900915*^-19", "\"18 digits\""}, 
-       {"\"F against LevinRule at {1.000, 1.000, 1.000}\"", "\"numerical\"", 
-        RowBox[{"-", "5.495693908626214322`3.9862712608009003*^-19"}], 
-        "\"18 digits\""}, 
-       {"\"F against LevinRule at {1.000, 1.000, 3.000}\"", "\"numerical\"", 
-        "1.604711200665591468`2.657812768022215*^-20", "\"19 digits\""}, 
-       {"\"F benchmark (1.3, 0.7, 1)\"", "\"numerical\"", 
-        RowBox[{"-", "1.0368074680878201`3.686602761286058*^-22"}], 
-        "\"22 digits\""}, {"\"F benchmark (0.8, 2.5, 1.2)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "9.17115736462286`2.33967925592749*^-24"}], "\"23 digits\""}, 
-       {"\"common momentum-log shift cancels\"", "\"exact\"", "0", 
-        "\"identity\""}, 
-       {"\"k (4.24) relative change from k=10^8 to k=10^12\"", 
-        "\"numerical\"", 
-        "1.2440641340892288402541469223953`4.793812774050223*^-7", 
-        "\"6 digits\""}, {"\"weight lowering\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"partial fractions\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"Factor[u] on the trilogarithm arguments\"", 
-        "\"exact\"", "0", "\"identity\""}, 
-       {"\"Factor[1-u] on the trilogarithm arguments\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"P+ symmetric under a <-> b\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"P- antisymmetric under a <-> b\"", "\"exact\"", 
-        "0", "\"identity\""}, {"\"(4.25) and (4.26): positive logs and \
-polylogarithm arguments below 1\"", "\"exact\"", "0", "\"identity\""}, 
-       {"\"k (4.24) independent of k at r = (1/2, 1/3)\"", "\"numerical\"", 
-        "0``28.220295029417123", "\"30 digits\""}, 
-       {"\"k (4.24) independent of k at r = (-1/2, 1/4)\"", "\"numerical\"", 
-        "0``27.731516409733466", "\"30 digits\""}, 
-       {"\"physical kinematics is 0 < r12, r34 < 1\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"positive momenta are -1 < r12, r34 < 1\"", 
-        "\"exact\"", "0", "\"identity\""}, 
-       {"\"0 < r < 1 gives a > k and b > k\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"-1 < r < 1 gives positive momenta\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"Landen partner for r12\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"Landen logarithm for r12\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"Landen partner for r34\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"Landen logarithm for r34\"", 
-        "\"exact\"", "0", "\"identity\""}, 
-       {"\"(4.28) left side vanishes at b = k\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"(4.28) right side vanishes at b = k\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"(4.28) vanishes at b = k\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"(4.28) b-derivatives agree\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"(4.28) at {1.3, 1.7, 0.70}\"", 
-        "\"numerical\"", "0``30.587909692713065", "\"30 digits\""}, 
-       {"\"(4.28) at {0.80, 1.5, 2.5}\"", "\"numerical\"", 
-        "0``30.574496572759763", "\"30 digits\""}, 
-       {"\"(4.28) at {2.0, 3.0, 1.0}\"", "\"numerical\"", 
-        "0``30.457972808367153", "\"30 digits\""}, 
-       {"\"derivative of (4.24) equals (4.21)\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"trilogarithm limits -1, 1/2, 1 and 1\"", 
-        "\"exact\"", "0", "\"identity\""}, {"\"P+ tends to 0\"", "\"exact\"", 
-        "0", "\"identity\""}, {"\"P- tends to 0\"", "\"exact\"", "0", 
-        "\"identity\""}, {"\"(4.24) equals (4.22) at (1.3, 1.7, 0.7)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "1.64723193196158419209`0.4822789344420582*^-18"}], 
-        "\"19 digits\""}, {"\"(3.17) against (4.24) at (1.3, 1.7, 0.7)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "1.7735045304453009197247892`2.5186774235641214*^-12"}], 
-        "\"13 digits\""}, {"\"(3.17) against (4.24) at (0.8, 1.5, 2.5)\"", 
-        "\"numerical\"", 
-        "9.301947060512767432093439`0.48984385992473134*^-14", 
-        "\"14 digits\""}, {"\"(4.24) benchmark (1.3, 1.7, 0.7)\"", 
-        "\"numerical\"", "2.93558482786854527`5.43651019442017*^-21", 
-        "\"22 digits\""}, {"\"(4.24) benchmark (0.8, 1.5, 2.5)\"", 
-        "\"numerical\"", RowBox[{"-", 
-          "2.09354917265637593`5.233889196698399*^-21"}], "\"22 digits\""}}, 
+  Cell["This notebook checks the computer-algebra steps of section 4.2; the \
+key result is the boxed difference (4.24).\nExact checks return residual 0 \
+for generic a, b, k > 0 (pairwise different).\nNumerical checks state the \
+digits of relative agreement reached; a precision goal is not an error \
+bound.\nEvaluate top to bottom in a fresh kernel. The ledger at the end lists \
+every check.\nThe notebook does not need the derivative notebook. The ansatz \
+search and the bounds behind the large-k limit are not part of it.", "Text"], 
+  Cell["Setup", "Section"], Cell["ClearAll[\"Global`*\"];\n$MaxExtraPrecision \
+= 10000;\n(* generic positive kinematics: a = k12, b = k34, k = exchanged \
+momentum *)\nasm = a > 0 && b > 0 && k > 0 && a != b && a != k && b != \
+k;\nledger = {};\nsec = \"\";\n\n(* all logarithm arguments below are \
+positive: split products and quotients *)\nlogExpand[e_] := \
+Together[PowerExpand[e /. Log[z_] :> Log[Factor[z]]] /. Log[4] -> 2 \
+Log[2]];\n\n(* exact check: the residual must reduce to 0, otherwise the \
+build stops *)\ncheckExact[name_, eq_, residual_] := Module[{r = residual},\n \
+ Scan[If[r =!= 0, r = #[residual]] &,\n    {Together, Expand, Simplify[#, \
+Assumptions -> asm] &,\n     FullSimplify[#, Assumptions -> asm] &}];\n  If[r \
+=!= 0, Print[\"FAILED: \", name]; Print[residual]; Abort[]];\n  \
+AppendTo[ledger, {sec, name, eq, \"exact\", 0, Infinity}];\n  0];\n\n(* \
+numerical check: records the digits of relative agreement reached \
+*)\ncheckNum[name_, eq_, got_, want_, digits_] := Module[{d, rel, n},\n  d = \
+Quiet[N[got, digits + 10] - N[want, digits + 10], {N::meprec, N::precw}];\n  \
+rel = Abs[d]/Max[1, Abs[N[want, 20]]];\n  n = If[rel == 0, digits + 10, \
+Floor[-Log10[rel]]];\n  If[n < digits, Print[\"FAILED: \", name, \" \", n]; \
+Abort[]];\n  AppendTo[ledger, {sec, name, eq, \"numerical\", ToString[n] <> \
+\" digits\", n}];\n  n];\n\n(* short PASS line for the current section \
+*)\npass[] := Module[{r = Select[ledger, First[#] === sec &], nd},\n  nd = \
+Cases[r, {_, _, _, \"numerical\", _, n_} :> n];\n  \"PASS \" <> sec <> \": \" \
+<> ToString[Count[r, {_, _, _, \"exact\", __}]] <> \" exact\"\n   <> If[nd \
+=== {}, \"\", \", \" <> ToString[Length[nd]] <> \" numerical (at least \"\n   \
+  <> ToString[Min[nd]] <> \" digits)\"]]", "Input"], 
+  Cell["4.2.3  The closed form", "Section"], Cell["(4.24)  boxed difference, \
+Delta = 2 pi^3 [P+/(a+b) + P-/(a-b)]\n(4.25)  P+\n(4.26)  P-\nTyped as \
+printed. No check in this cell; the later cells use these definitions.", 
+   "Text"], Cell["(* (4.25): P+ ; u = k12, v = k34, t = k *)\nPp[u_, v_, t_] \
+:= (Zeta[3]\n  - PolyLog[3, (u - t)/(u + t)] - PolyLog[3, (v - t)/(v + t)]\n  \
+- PolyLog[3, (u - t) (v - t)/((u + t) (v + t))]\n  - 2 (PolyLog[3, -(u - \
+t)/(2 t)] + PolyLog[3, -(v - t)/(2 t)])\n  + PolyLog[3, -(u - t)/(v + t)] + \
+PolyLog[3, -(v - t)/(u + t)]\n  + Log[(u + t) (v + t)/(4 t^2)] (PolyLog[2, \
+-(u - t)/(2 t)] + PolyLog[2, -(v - t)/(2 t)])\n  + Log[(u + t) (v + t)/(4 \
+t^2)]^3/6);\n\n(* (4.26): P- *)\nPm[u_, v_, t_] := (2 (PolyLog[3, (u - t)/(u \
++ t)] - PolyLog[3, (v - t)/(v + t)])\n  + 2 (PolyLog[3, -(u - t)/(2 t)] - \
+PolyLog[3, -(v - t)/(2 t)])\n  - Log[(u + t) (v + t)/(4 t^2)] (PolyLog[2, -(u \
+- t)/(2 t)] - PolyLog[2, -(v - t)/(2 t)])\n  + Pi^2/6 Log[(u + t)/(v + t)]\n  \
+- (Log[(u + t)/(2 t)]^3 - Log[(v + t)/(2 t)]^3)/3);\n\n(* (4.24): the boxed \
+difference *)\nDelta24[u_, v_, t_] := 2 Pi^3 (Pp[u, v, t]/(u + v) + Pm[u, v, \
+t]/(u - v));", "Input"], Cell["4.2.3  Landen and the five-term relation", 
+   "Section"], Cell["(4.19)  Landen, for r12 and r34 as in the first line of \
+(4.20) and its image\n(4.28)  five-term relation in the form used\nExact: the \
+Landen partners and logarithms; both sides of (4.28) vanish at b = k and \
+their b-derivatives agree.\nNumerical: (4.19) and (4.28) at two points; the \
+second has k > a, b.", "Text"], Cell["sec = \"4.2.3, Landen and \
+(4.28)\";\n\n(* the arguments: r12, r34 of (4.27), and the four arguments of \
+(4.21) *)\nra = (a - k)/(a + k); rb = (b - k)/(b + k);\nna = -(a - k)/(2 k); \
+nb = -(b - k)/(2 k);\nca = -(a - k)/(b + k); cb = -(b - k)/(a + k);\nlA = \
+Log[(a + k)/(2 k)]; lB = Log[(b + k)/(2 k)];\ncanon[e_] := e /. PolyLog[2, \
+z_] :> PolyLog[2, Together[z]];\n\n(* (4.19) with w = r12 and r34, as in the \
+first line of (4.20) and its image *)\nlanden[w_] := -PolyLog[2, w/(w - 1)] - \
+Log[1 - w]^2/2;\ncheckExact[\"Landen partners of r12, r34\", \"(4.20)\",\n  \
+Together[ra/(ra - 1) - na] + Together[rb/(rb - 1) - \
+nb]];\ncheckExact[\"Landen logarithms of r12, r34\", \"(4.20)\",\n  \
+Expand[logExpand[Log[1 - ra]^2 - lA^2 + Log[1 - rb]^2 - \
+lB^2]]];\nDo[checkNum[\"Landen (4.19) for r12, r34 at (a,b,k) = \" <> \
+ToString[pt, InputForm], \"(4.19)\",\n    Max[Map[Abs[N[PolyLog[2, #], 40] + \
+N[PolyLog[2, #/(# - 1)], 40] + N[Log[1 - #]^2/2, 40]] &,\n      {ra, rb} /. \
+Thread[{a, b, k} -> pt]]], 0, 25],\n  {pt, {{13/10, 17/10, 7/10}, {1/2, 4/5, \
+3}}}];\n\n(* (4.28): both sides vanish at b = k and the b-derivatives agree \
+(all logarithms positive,\n   all arguments below 1 for positive momenta) \
+*)\nfiveL = PolyLog[2, ra rb];\nfiveR = PolyLog[2, ca] + PolyLog[2, cb] - \
+PolyLog[2, na] - PolyLog[2, nb] - lA lB;\nfive = canon[fiveL - \
+fiveR];\ncheckExact[\"(4.28) vanishes at b = k\", \"(4.28)\", logExpand[five \
+/. b -> k]];\ncheckExact[\"(4.28) b-derivatives agree\", \"(4.28)\", \
+logExpand[canon[D[five, b]]]];\nDo[checkNum[\"(4.28) at (a,b,k) = \" <> \
+ToString[pt, InputForm], \"(4.28)\",\n    fiveL /. Thread[{a, b, k} -> pt], \
+fiveR /. Thread[{a, b, k} -> pt], 30],\n  {pt, {{13/10, 17/10, 7/10}, {1/2, \
+4/5, 3}}}];  (* second point: k > a, b *)\npass[]", "Input"], 
+  Cell[BoxData["\"PASS 4.2.3, Landen and (4.28): 4 exact, 4 numerical (at \
+least 35 digits)\""], "Output"], Cell["4.2.3  The derivative of (4.24)", 
+   "Section"], Cell["(4.21)  boxed derivative, typed as printed\nThe \
+k-derivative of (4.24), reduced with Landen and (4.28), leaves four distinct \
+dilogarithms and equals 2k times (4.21).", "Text"], 
+  Cell["sec = \"4.2.3, derivative\";\n\n(* (4.21) as printed *)\nres421[u_, \
+v_, t_] := Pi^3/t (\n  (PolyLog[2, -(v - t)/(u + t)] - PolyLog[2, -(v - t)/(2 \
+t)] + Log[(u + t)/(2 t)]^2/2)/((u - t) (v + t))\n  + (PolyLog[2, -(u - t)/(v \
++ t)] - PolyLog[2, -(u - t)/(2 t)] + Log[(v + t)/(2 t)]^2/2)/((u + t) (v - \
+t))\n  + Log[(u + t)/(2 t)] Log[(v + t)/(2 t)]/((u - t) (v - t))\n  - \
+(PolyLog[2, -(u - t)/(2 t)] + PolyLog[2, -(v - t)/(2 t)] + Pi^2/6)/((u + t) \
+(v + t)));\n\n(* Landen replaces the dilogarithms of r12 and r34, (4.28) that \
+of r12 r34 *)\nreduceLi[z_] := Which[\n  z === Together[ra], landen[ra],\n  z \
+=== Together[rb], landen[rb],\n  z === Together[ra rb], fiveR,\n  True, \
+PolyLog[2, z]];\n\n(* the k-derivative of (4.24), reduced *)\nreduced = \
+canon[canon[D[Delta24[a, b, k], k]] /. PolyLog[2, z_] :> reduceLi[z]];\n\n(* \
+four distinct dilogarithms remain, as in (4.21) *)\nfour = Sort[Together /@ \
+{na, nb, ca, cb}];\nremain = Sort[DeleteDuplicates[Cases[reduced, PolyLog[2, \
+z_] :> z, Infinity]]];\ncheckExact[\"four dilogarithms remain\", \"(4.21)\", \
+Boole[remain =!= four]];\n\n(* the four become symbols, the logarithms are \
+expanded; compare with 2 k (4.21) *)\nliOf = <|Together[na] -> liA, \
+Together[nb] -> liB, Together[ca] -> liC, Together[cb] -> \
+liD|>;\nsymbolize[e_] := canon[e] /. PolyLog[2, z_] :> \
+liOf[z];\ncheckExact[\"d/dk of (4.24) = 2 k (4.21)\", \"(4.21), (4.24)\",\n  \
+logExpand[symbolize[reduced] - symbolize[2 k res421[a, b, k]]]];\npass[]", 
+   "Input"], Cell[BoxData["\"PASS 4.2.3, derivative: 2 exact\""], "Output"], 
+  Cell["4.2.3  Large k", "Section"], Cell["The trilogarithm arguments tend to \
+-1, -1, 1/2, 1/2, 1, 1, 1, and P+ and P- tend to 0, from the special values \
+of Li3 and Li2.\nThis checks only these limits, not the bounds behind the \
+large-k limit of the integral.", "Text"], Cell["sec = \"4.2.3, large \
+k\";\n\n(* trilogarithm arguments as k -> Infinity: r12, r34, na, nb, r12 \
+r34, ca, cb *)\nlimits = Limit[{ra, rb, na, nb, ra rb, ca, cb}, k -> \
+Infinity, Assumptions -> a > 0 && b > 0];\ncheckExact[\"trilogarithm \
+arguments tend to -1, 1/2, 1, 1\", \"4.2.3\",\n  Boole[limits =!= {-1, -1, \
+1/2, 1/2, 1, 1, 1}]];\n\n(* k -> Infinity inside every polylogarithm and \
+logarithm; Li_n is continuous at -1, 1/2, 1.\n   The zeta(3), pi^2 log 2 and \
+log^3 2 terms cancel, using the closed form of Li3(1/2) *)\natInf[e_] := e /. \
+{\n  PolyLog[n_, z_] :> PolyLog[n, Limit[z, k -> Infinity, Assumptions -> a > \
+0 && b > 0]],\n  Log[z_] :> Log[Limit[z, k -> Infinity, Assumptions -> a > 0 \
+&& b > 0]]};\ncheckExact[\"P+ tends to 0\", \"(4.25)\", \
+logExpand[FunctionExpand[atInf[Pp[a, b, k]]]]];\ncheckExact[\"P- tends to \
+0\", \"(4.26)\", logExpand[FunctionExpand[atInf[Pm[a, b, k]]]]];\npass[]", 
+   "Input"], Cell[BoxData["\"PASS 4.2.3, large k: 3 exact\""], "Output"], 
+  Cell["4.2.3  (4.24) against (4.22)", "Section"], 
+  Cell["(4.22)  Delta as minus the integral of 2k' times (4.21) from k to \
+infinity\nNumerical, at two points; the second has k > a, b.", "Text"], 
+  Cell["sec = \"4.2.3, (4.22)\";\n\n(* (4.22): minus the integral of 2 t \
+(4.21) from k to infinity, split at k12 and k34 *)\ntail[u_, v_, t0_] := \
+-NIntegrate[2 t res421[u, v, t],\n  Evaluate[Join[{t, t0}, Sort[Select[{u, v, \
+10}, # > t0 &]], {Infinity}]],\n  WorkingPrecision -> 20, PrecisionGoal -> \
+12, MaxRecursion -> 12,\n  Method -> {\"GlobalAdaptive\", \
+\"SymbolicProcessing\" -> 0}];\n\nDo[checkNum[\"(4.24) vs (4.22) at (a,b,k) = \
+\" <> ToString[pt, InputForm], \"(4.22), (4.24)\",\n    Delta24 @@ pt, tail \
+@@ pt, 12],\n  {pt, {{13/10, 17/10, 7/10}, {4/5, 3/2, 5/2}}}];  (* second \
+point: k > a, b *)\npass[]", "Input"], 
+  Cell[BoxData[
+    "\"PASS 4.2.3, (4.22): 0 exact, 2 numerical (at least 19 digits)\""], 
+   "Output"], Cell["4.2.1, 4.2.3  Direct integration of (3.17)", "Section"], 
+  Cell["(4.23)  [PZP] with the external times first, then the loop energies, \
+the middle time last\nThe loop factor is the energy integral of (4.23). Its \
+closed form is compared with LevinRule quadrature for k below k12, above k12 \
+and close to k12.", "Text"], Cell["sec = \"4.2.1, 4.2.3, direct \
+integration\";\n\n(* loop factor of (4.23): the p integral of k12 \
+log(p^2+k^2) cos(pz)/(p^2+k12^2) over the real line.\n   Log[Abs[..]] is \
+needed for k > k12; u = k12, t = k *)\nloopF[u_?NumericQ, t_?NumericQ, \
+z_?NumericQ] := (Pi Exp[-u z] Log[Abs[t^2 - u^2]]\n  - Pi Exp[-u z] \
+ExpIntegralEi[(u - t) z] + Pi Exp[u z] ExpIntegralEi[-(u + t) \
+z]);\nloopNum[u_, t_, z_] := 2 NIntegrate[u Log[p^2 + t^2] Cos[p z]/(p^2 + \
+u^2), {p, 0, Infinity},\n  Method -> \"LevinRule\", WorkingPrecision -> 22, \
+PrecisionGoal -> 14, MaxRecursion -> 30];\nDo[checkNum[\"loop factor vs \
+LevinRule at (k12, k, z) = \" <> ToString[pt, InputForm], \"(4.23)\",\n    \
+loopF @@ pt, loopNum @@ pt, 12],\n  {pt, {{13/10, 7/10, 1}, {4/5, 5/2, 6/5}, \
+{1, 1000001/1000000, 1}}}];  (* k < k12, k > k12, k near k12 *)", "Input"], 
+  Cell["(3.17)  the single-energy line and [PZP] of (4.23), integrated \
+numerically and compared with (4.24).\nThe digits reached are the precision \
+goal of these integrations; the Python script reaches about 30 digits.", 
+   "Text"], Cell["(* external-time transforms of 1, log z, log^2 z: (4.3), \
+(4.4) and the same for log^2 z *)\nt0[c_, p_] := c/(p^2 + c^2);\nt1[c_, p_] \
+:= -Re[(EulerGamma + Log[c - I p])/(c - I p)];\nt2[c_, p_] := Re[((EulerGamma \
++ Log[c - I p])^2 + Pi^2/6)/(c - I p)];\nline[f_] := 2 NIntegrate[f[p], {p, \
+0, 1, 10, Infinity},\n  WorkingPrecision -> 16, PrecisionGoal -> 10, \
+MaxRecursion -> 10,\n  Method -> {\"GlobalAdaptive\", \"SymbolicProcessing\" \
+-> 0}];\n\n(* (3.17): the single-energy line, times -Pi^2, and [PZP] of \
+(4.23) with the middle time last, times -Pi *)\ndeltaDirect[u_, v_, t_] := \
+Module[{mom, single, pzp},\n  mom[p_] := Log[p^2 + t^2];\n  single = \
+line[Function[p, mom[p] (t2[u, p] t0[v, p] - 2 t1[u, p] t1[v, p] + t0[u, p] \
+t2[v, p])\n    - mom[p]^2 (t1[u, p] t0[v, p] + t0[u, p] t1[v, p])]];\n  pzp = \
+Block[{$MaxExtraPrecision = 20}, NIntegrate[2 Log[z] loopF[u, t, z] loopF[v, \
+t, z],\n    {z, 0, 1, 10, Infinity}, WorkingPrecision -> 16, PrecisionGoal -> \
+10, MaxRecursion -> 10,\n    Method -> {\"GlobalAdaptive\", \
+\"SymbolicProcessing\" -> 0}]];\n  -Pi^2 single - Pi \
+pzp];\n\nDo[checkNum[\"(3.17) with [PZP] of (4.23) vs (4.24) at (a,b,k) = \" \
+<> ToString[pt, InputForm],\n    \"(3.17), (4.23), (4.24)\", deltaDirect @@ \
+pt, Delta24 @@ pt, 12],\n  {pt, {{13/10, 17/10, 7/10}, {4/5, 3/2, 5/2}}}];  \
+(* second point: k > a, b *)\npass[]", "Input"], 
+  Cell[BoxData["\"PASS 4.2.1, 4.2.3, direct integration: 0 exact, 5 numerical \
+(at least 13 digits)\""], "Output"], Cell["Ledger", "Section"], 
+  Cell["Grid[Prepend[ledger[[All, 1 ;; 5]],\n  {\"section\", \"check\", \
+\"equation\", \"kind\", \"residual / agreement\"}],\n  Frame -> All, \
+Alignment -> Left]", "Input"], 
+  Cell[BoxData[TagBox[GridBox[{{"\"section\"", "\"check\"", "\"equation\"", 
+        "\"kind\"", "\"residual / agreement\""}, 
+       {"\"4.2.3, Landen and (4.28)\"", "\"Landen partners of r12, r34\"", 
+        "\"(4.20)\"", "\"exact\"", "0"}, {"\"4.2.3, Landen and (4.28)\"", 
+        "\"Landen logarithms of r12, r34\"", "\"(4.20)\"", "\"exact\"", "0"}, 
+       {"\"4.2.3, Landen and (4.28)\"", 
+        "\"Landen (4.19) for r12, r34 at (a,b,k) = {13/10, 17/10, 7/10}\"", 
+        "\"(4.19)\"", "\"numerical\"", "\"35 digits\""}, 
+       {"\"4.2.3, Landen and (4.28)\"", 
+        "\"Landen (4.19) for r12, r34 at (a,b,k) = {1/2, 4/5, 3}\"", 
+        "\"(4.19)\"", "\"numerical\"", "\"35 digits\""}, 
+       {"\"4.2.3, Landen and (4.28)\"", "\"(4.28) vanishes at b = k\"", 
+        "\"(4.28)\"", "\"exact\"", "0"}, {"\"4.2.3, Landen and (4.28)\"", 
+        "\"(4.28) b-derivatives agree\"", "\"(4.28)\"", "\"exact\"", "0"}, 
+       {"\"4.2.3, Landen and (4.28)\"", 
+        "\"(4.28) at (a,b,k) = {13/10, 17/10, 7/10}\"", "\"(4.28)\"", 
+        "\"numerical\"", "\"40 digits\""}, {"\"4.2.3, Landen and (4.28)\"", 
+        "\"(4.28) at (a,b,k) = {1/2, 4/5, 3}\"", "\"(4.28)\"", 
+        "\"numerical\"", "\"40 digits\""}, {"\"4.2.3, derivative\"", 
+        "\"four dilogarithms remain\"", "\"(4.21)\"", "\"exact\"", "0"}, 
+       {"\"4.2.3, derivative\"", "\"d/dk of (4.24) = 2 k (4.21)\"", 
+        "\"(4.21), (4.24)\"", "\"exact\"", "0"}, {"\"4.2.3, large k\"", 
+        "\"trilogarithm arguments tend to -1, 1/2, 1, 1\"", "\"4.2.3\"", 
+        "\"exact\"", "0"}, {"\"4.2.3, large k\"", "\"P+ tends to 0\"", 
+        "\"(4.25)\"", "\"exact\"", "0"}, {"\"4.2.3, large k\"", 
+        "\"P- tends to 0\"", "\"(4.26)\"", "\"exact\"", "0"}, 
+       {"\"4.2.3, (4.22)\"", 
+        "\"(4.24) vs (4.22) at (a,b,k) = {13/10, 17/10, 7/10}\"", 
+        "\"(4.22), (4.24)\"", "\"numerical\"", "\"19 digits\""}, 
+       {"\"4.2.3, (4.22)\"", 
+        "\"(4.24) vs (4.22) at (a,b,k) = {4/5, 3/2, 5/2}\"", 
+        "\"(4.22), (4.24)\"", "\"numerical\"", "\"22 digits\""}, 
+       {"\"4.2.1, 4.2.3, direct integration\"", 
+        "\"loop factor vs LevinRule at (k12, k, z) = {13/10, 7/10, 1}\"", 
+        "\"(4.23)\"", "\"numerical\"", "\"17 digits\""}, 
+       {"\"4.2.1, 4.2.3, direct integration\"", 
+        "\"loop factor vs LevinRule at (k12, k, z) = {4/5, 5/2, 6/5}\"", 
+        "\"(4.23)\"", "\"numerical\"", "\"17 digits\""}, 
+       {"\"4.2.1, 4.2.3, direct integration\"", "\"loop factor vs LevinRule \
+at (k12, k, z) = {1, 1000001/1000000, 1}\"", "\"(4.23)\"", "\"numerical\"", 
+        "\"18 digits\""}, {"\"4.2.1, 4.2.3, direct integration\"", "\"(3.17) \
+with [PZP] of (4.23) vs (4.24) at (a,b,k) = {13/10, 17/10, 7/10}\"", 
+        "\"(3.17), (4.23), (4.24)\"", "\"numerical\"", "\"13 digits\""}, 
+       {"\"4.2.1, 4.2.3, direct integration\"", "\"(3.17) with [PZP] of \
+(4.23) vs (4.24) at (a,b,k) = {4/5, 3/2, 5/2}\"", 
+        "\"(3.17), (4.23), (4.24)\"", "\"numerical\"", "\"14 digits\""}}, 
       GridBoxAlignment -> {"Columns" -> {{Left}}}, AutoDelete -> False, 
       GridBoxFrame -> {"Columns" -> {{True}}, "Rows" -> {{True}}}, 
       GridBoxItemSize -> {"Columns" -> {{Automatic}}, 
